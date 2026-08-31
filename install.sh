@@ -158,7 +158,10 @@ fi
 
 log ""
 log "Next:"
-log "  runtime bootstrap        # prepare the Runtime Home"
 log "  runtime config validate  # confirm the install"
+log ""
+log "The Runtime Home is created by the first command you run - there is no"
+log "separate setup step. Governance is deliberately not created for you:"
+log "until you supply a policy document, the compiled safety profile governs."
 log ""
 log "Docs: https://docs.engineeringruntime.com"
