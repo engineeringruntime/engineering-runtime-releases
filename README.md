@@ -4,6 +4,18 @@ This repository contains the official binary releases for Engineering Runtime.
 
 ## Install
 
+### Homebrew (macOS and Linux)
+
+```bash
+brew install engineeringruntime/tap/engineering-runtime
+"$(brew --prefix)/bin/runtime" version
+```
+
+The public [`engineeringruntime/homebrew-tap`](https://github.com/engineeringruntime/homebrew-tap)
+formula supports arm64 and amd64 and verifies the release archive checksum.
+
+### Verification script
+
 ```bash
 curl -fsSL https://raw.githubusercontent.com/engineeringruntime/engineering-runtime-releases/main/install.sh | sh
 runtime version
