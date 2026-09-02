@@ -5,7 +5,7 @@ This repository contains the official binary releases for Engineering Runtime.
 ## Install
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/kishore-gutta/engineering-runtime-releases/main/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/engineeringruntime/engineering-runtime-releases/main/install.sh | sh
 runtime version
 ```
 
@@ -68,4 +68,4 @@ assistant — can install and run the runtime without credentials. The Engineeri
 Runtime **source** repository is maintained separately and remains **private**.
 A public artifact is not open source.
 
-[latest]: https://github.com/kishore-gutta/engineering-runtime-releases/releases/latest
+[latest]: https://github.com/engineeringruntime/engineering-runtime-releases/releases/latest

@@ -1,7 +1,7 @@
 #!/bin/sh
 # Engineering Runtime installer.
 #
-#   curl -fsSL https://raw.githubusercontent.com/kishore-gutta/engineering-runtime-releases/main/install.sh | sh
+#   curl -fsSL https://raw.githubusercontent.com/engineeringruntime/engineering-runtime-releases/main/install.sh | sh
 #
 # No GitHub account or token is required: this repository publishes the release
 # artifacts publicly. The runtime *source* repository remains private — a public
@@ -24,7 +24,7 @@
 #
 set -eu
 
-REPO="kishore-gutta/engineering-runtime-releases"
+REPO="engineeringruntime/engineering-runtime-releases"
 API="https://api.github.com/repos/${REPO}"
 
 log()  { printf '%s\n' "$*"; }

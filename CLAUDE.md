@@ -22,7 +22,7 @@ binaries.
 
 The latest published Release is the source of truth for "what a user can
 install". Check with
-`gh release list -R kishore-gutta/engineering-runtime-releases`.
+`gh release list -R engineeringruntime/engineering-runtime-releases`.
 
 ---
 
