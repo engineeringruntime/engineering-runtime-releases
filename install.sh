@@ -8,7 +8,7 @@
 # artifact is not open source.
 #
 # Environment:
-#   VERSION=v0.5.4      install a specific tag instead of the latest
+#   VERSION=v0.8.0      install a specific tag instead of the latest
 #   INSTALL_DIR=/path   install here instead of the default search
 #
 # Exit codes are deliberately distinct, because an automated caller branches on

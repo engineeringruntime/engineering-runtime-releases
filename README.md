@@ -15,7 +15,7 @@ SHA256 **before** extracting, and fails closed if it does not match.
 
 | Variable | Effect |
 |---|---|
-| `VERSION=v0.5.4` | Install a specific tag instead of the latest |
+| `VERSION=v0.8.0` | Install a specific tag instead of the latest |
 | `INSTALL_DIR=/path` | Install here instead of `/usr/local/bin`, else `~/.local/bin` |
 
 ### Exit codes
@@ -46,7 +46,7 @@ shasum -a 256 -c SHA256SUMS.txt --ignore-missing
 without it the five you did not download are reported as failures.
 
 The archive expands to a **versioned directory** (for example
-`engineering-runtime-v0.5.4-darwin-arm64/`) containing the `runtime` binary —
+`engineering-runtime-v0.8.0-darwin-arm64/`) containing the `runtime` binary —
 not a bare `./runtime`.
 
 Windows is not covered by the installer: download the `.zip` from the

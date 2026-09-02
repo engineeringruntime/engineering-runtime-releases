@@ -17,7 +17,7 @@ binaries.
 | Carried by a GitHub Release | Not in this repo |
 |---|---|
 | Versioned `runtime` binaries per platform | Runtime source code (→ `../engineering-runtime`) |
-| `SHA256SUMS.txt` checksums | Build/staging scratch (→ `../engineering-runtime-development`) |
+| `SHA256SUMS.txt` checksums | Build/staging scratch (ephemeral in the Runtime release workflow) |
 | Release notes on the Release itself | Customer upgrade guides (→ `../engineering-runtime-docs`) |
 
 The latest published Release is the source of truth for "what a user can
@@ -30,9 +30,9 @@ install". Check with
 
 1. **Never commit binaries, archives, or checksums into git.** They are Release
    assets. This repo stays docs-only.
-2. **This repo does not decide what ships** — `../engineering-runtime` and its
-   `PROGRESS.md` do. Publishing here only distributes what that binary already
-   is.
+2. **This repo does not decide what ships** — `../engineering-runtime` source,
+   tests, version metadata and release tag do. Publishing here only distributes
+   what that binary already is.
 3. **Do not write release notes that claim behavior the binary lacks.** Ground
    every note in the core repo's changes for that version.
 4. **Tag naming is not free-form.** Match the existing series. Note that both
@@ -50,14 +50,13 @@ install". Check with
 | `../engineering-runtime-ci` | Downloads the release archive, verifies `SHA256SUMS.txt`, puts `runtime` on `PATH` (`.github/actions/setup-runtime/`) |
 | `../engineering-runtime-series` | `releases.md` reads the latest Release live from the GitHub API |
 | `../engineering-runtime-docs` | Install + upgrade instructions point users here |
-| End users | `gh release download` / direct asset download |
+| End users | Public installer or direct asset download |
 
 Because CI and the public site both read this repo live, a bad or deleted
 Release breaks installs and the website's releases page at the same time.
 
-**Private-repo note:** a workflow in another repo cannot read this repo's
-Releases with the default `github.token` while it is private — that is why
-`../engineering-runtime-ci` uses a `RUNTIME_GITHUB_TOKEN` secret.
+The repository and its release assets are public. Downloads require no GitHub
+token; `RUNTIME_GITHUB_TOKEN` is only for later governed GitHub operations.
 
 ---
 
