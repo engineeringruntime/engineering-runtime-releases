@@ -1,7 +1,7 @@
 # CLAUDE.md — engineering-runtime-releases
 
-**Distribution repo for published `runtime` binaries.** Supportive child of the
-Runtime product hub.
+**Public release, installation, Discussions and Issues home for Runtime.**
+Supportive child of the Runtime product hub.
 
 Product hub: [`../CLAUDE.md`](../CLAUDE.md).
 ER map: [`../../engineering-runtime-workspace/CLAUDE.md`](../../engineering-runtime-workspace/CLAUDE.md).
@@ -20,9 +20,17 @@ binaries.
 | `SHA256SUMS.txt` checksums | Build/staging scratch (ephemeral in the Runtime release workflow) |
 | Release notes on the Release itself | Customer upgrade guides (→ `../engineering-runtime-docs`) |
 
-The latest published Release is the source of truth for "what a user can
-install". Check with
+The latest published non-draft, non-prerelease Release is the source of truth
+for "what a user can install". The README's marked latest-release block mirrors
+that release; the Runtime release workflow owns that block and no other README
+content. Check with
 `gh release list -R engineeringruntime/engineering-runtime-releases`.
+
+This repository is also the source repository for organization Discussions and
+the canonical public Issue tracker. Use the stable organization URL for
+conversation links:
+
+<https://github.com/orgs/engineeringruntime/discussions>
 
 ---
 
@@ -40,6 +48,10 @@ install". Check with
    **latest Release** rather than a tag pattern — do not break that assumption.
 5. Publishing is a deliberate act. Do not cut, retag, or delete a Release as a
    side effect of another task.
+6. Do not hand-edit content between `latest-release:start` and
+   `latest-release:end`; it is generated from the published GitHub Latest
+   Release. Discussion titles, bodies and categories remain owner-managed and
+   are not release artifacts.
 
 ---
 

@@ -1,6 +1,27 @@
 # Engineering Runtime Releases
 
-This repository contains the official binary releases for Engineering Runtime.
+This repository is the public home for Engineering Runtime releases,
+installation, Discussions and issue reporting. Runtime source is maintained
+privately; the binaries and checksums published here are public.
+
+<!-- latest-release:start -->
+## Latest release — v0.9.6
+
+Published **2026-09-04**. [Open the full GitHub release](https://github.com/engineeringruntime/engineering-runtime-releases/releases/tag/v0.9.6) or read the [technical release notes](https://docs.engineeringruntime.com/release-notes/).
+
+**What changed:** Capability and command audit evidence is now attributable, correlated and safe under parallel execution.
+
+| Platform | Architecture | Archive |
+|---|---|---|
+| Linux | amd64 | [`engineering-runtime-v0.9.6-linux-amd64.tar.gz`](https://github.com/engineeringruntime/engineering-runtime-releases/releases/download/v0.9.6/engineering-runtime-v0.9.6-linux-amd64.tar.gz) |
+| Linux | arm64 | [`engineering-runtime-v0.9.6-linux-arm64.tar.gz`](https://github.com/engineeringruntime/engineering-runtime-releases/releases/download/v0.9.6/engineering-runtime-v0.9.6-linux-arm64.tar.gz) |
+| macOS | amd64 | [`engineering-runtime-v0.9.6-darwin-amd64.tar.gz`](https://github.com/engineeringruntime/engineering-runtime-releases/releases/download/v0.9.6/engineering-runtime-v0.9.6-darwin-amd64.tar.gz) |
+| macOS | arm64 | [`engineering-runtime-v0.9.6-darwin-arm64.tar.gz`](https://github.com/engineeringruntime/engineering-runtime-releases/releases/download/v0.9.6/engineering-runtime-v0.9.6-darwin-arm64.tar.gz) |
+| Windows | amd64 | [`engineering-runtime-v0.9.6-windows-amd64.zip`](https://github.com/engineeringruntime/engineering-runtime-releases/releases/download/v0.9.6/engineering-runtime-v0.9.6-windows-amd64.zip) |
+| Windows | arm64 | [`engineering-runtime-v0.9.6-windows-arm64.zip`](https://github.com/engineeringruntime/engineering-runtime-releases/releases/download/v0.9.6/engineering-runtime-v0.9.6-windows-arm64.zip) |
+
+[Verify every archive with `SHA256SUMS.txt`](https://github.com/engineeringruntime/engineering-runtime-releases/releases/download/v0.9.6/SHA256SUMS.txt).
+<!-- latest-release:end -->
 
 ## Install
 
@@ -27,7 +48,7 @@ SHA256 **before** extracting, and fails closed if it does not match.
 
 | Variable | Effect |
 |---|---|
-| `VERSION=v0.8.0` | Install a specific tag instead of the latest |
+| `VERSION=<release-tag>` | Install a specific tag instead of the latest, for example `v0.9.6` |
 | `INSTALL_DIR=/path` | Install here instead of `/usr/local/bin`, else `~/.local/bin` |
 
 ### Exit codes
@@ -58,7 +79,7 @@ shasum -a 256 -c SHA256SUMS.txt --ignore-missing
 without it the five you did not download are reported as failures.
 
 The archive expands to a **versioned directory** (for example
-`engineering-runtime-v0.8.0-darwin-arm64/`) containing the `runtime` binary —
+`engineering-runtime-<version>-darwin-arm64/`) containing the `runtime` binary —
 not a bare `./runtime`.
 
 Windows is not covered by the installer: download the `.zip` from the
@@ -71,7 +92,13 @@ Windows is not covered by the installer: download the `.zip` from the
 - SHA256 checksums
 - `install.sh`
 
-Full documentation: <https://docs.engineeringruntime.com>
+## Project links
+
+- [Product website](https://engineeringruntime.com/)
+- [Technical documentation](https://docs.engineeringruntime.com/)
+- [GitHub Discussions](https://github.com/orgs/engineeringruntime/discussions)
+- [Report an Issue](https://github.com/engineeringruntime/engineering-runtime-releases/issues)
+- [Report a security concern](mailto:support@engineeringruntime.com?subject=Security%20report)
 
 ## Public artifacts, private source
 
