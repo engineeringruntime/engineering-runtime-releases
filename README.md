@@ -5,22 +5,22 @@ installation, Discussions and issue reporting. Runtime source is maintained
 privately; the binaries and checksums published here are public.
 
 <!-- latest-release:start -->
-## Latest release — v0.9.7
+## Latest release — v0.9.8
 
-Published **2026-09-05**. [Open the full GitHub release](https://github.com/engineeringruntime/engineering-runtime-releases/releases/tag/v0.9.7) or read the [technical release notes](https://docs.engineeringruntime.com/release-notes/).
+Published **2026-09-05**. [Open the full GitHub release](https://github.com/engineeringruntime/engineering-runtime-releases/releases/tag/v0.9.8) or read the [technical release notes](https://docs.engineeringruntime.com/release-notes/).
 
 **What changed:** A Community Runtime can now enroll into an Enterprise Control Plane without changing binaries or weakening local governance.
 
 | Platform | Architecture | Archive |
 |---|---|---|
-| Linux | amd64 | [`engineering-runtime-v0.9.7-linux-amd64.tar.gz`](https://github.com/engineeringruntime/engineering-runtime-releases/releases/download/v0.9.7/engineering-runtime-v0.9.7-linux-amd64.tar.gz) |
-| Linux | arm64 | [`engineering-runtime-v0.9.7-linux-arm64.tar.gz`](https://github.com/engineeringruntime/engineering-runtime-releases/releases/download/v0.9.7/engineering-runtime-v0.9.7-linux-arm64.tar.gz) |
-| macOS | amd64 | [`engineering-runtime-v0.9.7-darwin-amd64.tar.gz`](https://github.com/engineeringruntime/engineering-runtime-releases/releases/download/v0.9.7/engineering-runtime-v0.9.7-darwin-amd64.tar.gz) |
-| macOS | arm64 | [`engineering-runtime-v0.9.7-darwin-arm64.tar.gz`](https://github.com/engineeringruntime/engineering-runtime-releases/releases/download/v0.9.7/engineering-runtime-v0.9.7-darwin-arm64.tar.gz) |
-| Windows | amd64 | [`engineering-runtime-v0.9.7-windows-amd64.zip`](https://github.com/engineeringruntime/engineering-runtime-releases/releases/download/v0.9.7/engineering-runtime-v0.9.7-windows-amd64.zip) |
-| Windows | arm64 | [`engineering-runtime-v0.9.7-windows-arm64.zip`](https://github.com/engineeringruntime/engineering-runtime-releases/releases/download/v0.9.7/engineering-runtime-v0.9.7-windows-arm64.zip) |
+| Linux | amd64 | [`engineering-runtime-v0.9.8-linux-amd64.tar.gz`](https://github.com/engineeringruntime/engineering-runtime-releases/releases/download/v0.9.8/engineering-runtime-v0.9.8-linux-amd64.tar.gz) |
+| Linux | arm64 | [`engineering-runtime-v0.9.8-linux-arm64.tar.gz`](https://github.com/engineeringruntime/engineering-runtime-releases/releases/download/v0.9.8/engineering-runtime-v0.9.8-linux-arm64.tar.gz) |
+| macOS | amd64 | [`engineering-runtime-v0.9.8-darwin-amd64.tar.gz`](https://github.com/engineeringruntime/engineering-runtime-releases/releases/download/v0.9.8/engineering-runtime-v0.9.8-darwin-amd64.tar.gz) |
+| macOS | arm64 | [`engineering-runtime-v0.9.8-darwin-arm64.tar.gz`](https://github.com/engineeringruntime/engineering-runtime-releases/releases/download/v0.9.8/engineering-runtime-v0.9.8-darwin-arm64.tar.gz) |
+| Windows | amd64 | [`engineering-runtime-v0.9.8-windows-amd64.zip`](https://github.com/engineeringruntime/engineering-runtime-releases/releases/download/v0.9.8/engineering-runtime-v0.9.8-windows-amd64.zip) |
+| Windows | arm64 | [`engineering-runtime-v0.9.8-windows-arm64.zip`](https://github.com/engineeringruntime/engineering-runtime-releases/releases/download/v0.9.8/engineering-runtime-v0.9.8-windows-arm64.zip) |
 
-[Verify every archive with `SHA256SUMS.txt`](https://github.com/engineeringruntime/engineering-runtime-releases/releases/download/v0.9.7/SHA256SUMS.txt).
+[Verify every archive with `SHA256SUMS.txt`](https://github.com/engineeringruntime/engineering-runtime-releases/releases/download/v0.9.8/SHA256SUMS.txt).
 <!-- latest-release:end -->
 
 ## Install
