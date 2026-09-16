@@ -61,9 +61,11 @@ need tar
 
 # shasum (macOS) or sha256sum (most Linux) — either is fine.
 if command -v shasum >/dev/null 2>&1; then
-  sha_check() { shasum -a 256 -c "$1" --ignore-missing >/dev/null 2>&1; }
+  sha_tool=shasum
+  sha_check_line() { printf '%s\n' "$1" | shasum -a 256 -c - >/dev/null 2>&1; }
 elif command -v sha256sum >/dev/null 2>&1; then
-  sha_check() { sha256sum -c "$1" --ignore-missing >/dev/null 2>&1; }
+  sha_tool=sha256sum
+  sha_check_line() { printf '%s\n' "$1" | sha256sum -c - >/dev/null 2>&1; }
 else
   die 3 "need 'shasum' or 'sha256sum' to verify the download."
 fi
@@ -98,11 +100,16 @@ log "  downloading SHA256SUMS.txt"
 curl -fsSL -o "${tmp}/SHA256SUMS.txt" "${base}/SHA256SUMS.txt" \
   || die 4 "could not download the checksum file: ${base}/SHA256SUMS.txt"
 
-# SHA256SUMS.txt lists every archive in the release, so verifying one download
-# needs --ignore-missing — without it the five files we did not fetch are
-# reported as failures, which reads like tampering.
 log "  verifying checksum"
-( cd "$tmp" && sha_check SHA256SUMS.txt ) \
+checksum_lines=$(awk -v wanted="$archive" '
+  $2 == wanted || $2 == "*" wanted { print }
+' "${tmp}/SHA256SUMS.txt")
+checksum_count=$(printf '%s\n' "$checksum_lines" | sed '/^$/d' | wc -l | tr -d ' ')
+[ "$checksum_count" = 1 ] \
+  || die 5 "checksum entry for ${archive} is missing or ambiguous.
+The release checksum manifest is not safe to use. Nothing has been installed."
+checksum_line=$(printf '%s\n' "$checksum_lines" | sed -n '1p')
+( cd "$tmp" && sha_check_line "$checksum_line" ) \
   || die 5 "checksum verification FAILED for ${archive}.
 The download does not match the published SHA256. Nothing has been installed.
 Do not use this file; retry, and if it fails again report it."
@@ -110,14 +117,37 @@ Do not use this file; retry, and if it fails again report it."
 # --- extract ------------------------------------------------------------------
 # The archive expands to a versioned directory containing the binary alongside
 # README/LICENSE and reference material — not a bare ./runtime.
-tar -xzf "${tmp}/${archive}" -C "$tmp" || die 1 "could not extract ${archive}"
+members=$(tar -tzf "${tmp}/${archive}") \
+  || die 1 "could not inspect ${archive}"
+while IFS= read -r member; do
+  case "$member" in
+    "${name}/"*) ;;
+    *) die 1 "archive contains an unexpected member path" ;;
+  esac
+  case "$member" in
+    /*|../*|*/../*|*/..|*'/./'*|*/.) die 1 "archive contains an absolute or traversal path" ;;
+  esac
+done <<EOF
+$members
+EOF
+tar -tvzf "${tmp}/${archive}" | awk -v root="${name}/" '
+  substr($0, 1, 1) ~ /[lcsbp]/ { bad=1 }
+  index($0, " " root) == 0 && index($0, " " root) == 0 { next }
+  END { exit bad }
+' || die 1 "archive contains an unsupported link or special member"
+tar -xzf "${tmp}/${archive}" -C "$tmp" --no-same-owner --no-same-permissions \
+  || die 1 "could not extract ${archive}"
 
 bin="${tmp}/${name}/runtime"
-if [ ! -f "$bin" ]; then
-  bin=$(find "$tmp" -type f -name runtime -perm -u+x 2>/dev/null | head -n 1) || true
-  [ -n "$bin" ] && [ -f "$bin" ] || die 1 "could not find the 'runtime' binary inside ${archive}"
-fi
+[ -f "$bin" ] || die 1 "could not find the expected runtime binary inside ${archive}"
 chmod +x "$bin" 2>/dev/null || true
+[ -x "$bin" ] || die 1 "the runtime binary inside ${archive} is not executable"
+reported_version=$("$bin" version 2>/dev/null) \
+  || die 1 "the runtime binary inside ${archive} could not report its version"
+case "$reported_version" in
+  *"${version#v}"*) ;;
+  *) die 1 "the runtime binary reports '${reported_version}', not ${version}" ;;
+esac
 
 # --- install ------------------------------------------------------------------
 target=""
@@ -134,8 +164,12 @@ Tried /usr/local/bin and ${target}. Set INSTALL_DIR=/somewhere/on/your/PATH."
   [ -w "$target" ] || die 6 "no writable install directory (${target})."
 fi
 
-cp "$bin" "${target}/runtime" || die 6 "could not write to ${target}"
-chmod +x "${target}/runtime" 2>/dev/null || true
+staged="${target}/.runtime.staging.$$"
+rm -f "$staged" 2>/dev/null || die 6 "could not prepare an install staging path"
+cp "$bin" "$staged" || die 6 "could not stage the runtime in ${target}"
+chmod 0755 "$staged" 2>/dev/null || die 6 "could not set runtime mode in ${target}"
+mv -f "$staged" "${target}/runtime" \
+  || die 6 "could not atomically replace runtime in ${target}"
 
 # --- report -------------------------------------------------------------------
 installed=$("${target}/runtime" version 2>/dev/null || echo "${version}")

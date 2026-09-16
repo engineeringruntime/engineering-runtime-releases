@@ -70,6 +70,15 @@ Release breaks installs and the website's releases page at the same time.
 The repository and its release assets are public. Downloads require no GitHub
 token; `RUNTIME_GITHUB_TOKEN` is only for later governed GitHub operations.
 
+The unreleased v0.9.9 installer hardening verifies exactly one checksum entry
+for the selected archive, rejects unexpected/traversal/symlink/special archive
+members, requires the expected versioned executable and reports the requested
+version before install. It stages the executable in the destination and atomically
+renames it into place, preserving an existing install when download, checksum,
+archive or staging validation fails. `test-install.sh` is an offline fixture only;
+it does not publish, contact GitHub or replace a user's binary. Windows remains
+outside this POSIX installer until the separate platform-support decision.
+
 ---
 
 ## Same-effort updates

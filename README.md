@@ -46,6 +46,13 @@ runtime version
 public. The installer detects your OS and architecture, verifies the published
 SHA256 **before** extracting, and fails closed if it does not match.
 
+The unreleased v0.9.9 installer additionally requires exactly one checksum entry,
+accepts only the expected versioned archive member tree, rejects traversal and
+special/link members, verifies the embedded binary's version, and atomically
+stages the replacement. An existing binary is left in place when any check
+fails. Run `./test-install.sh` in this repository for offline fixture coverage;
+it performs no network or release operation.
+
 | Variable | Effect |
 |---|---|
 | `VERSION=<release-tag>` | Install a specific tag instead of the latest, for example `v0.9.6` |
