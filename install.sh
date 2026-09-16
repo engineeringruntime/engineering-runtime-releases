@@ -4,7 +4,8 @@
 #   curl -fsSL https://raw.githubusercontent.com/engineeringruntime/engineering-runtime-releases/main/install.sh | sh
 #
 # The intended contract is anonymous public release artifacts. For private
-# internal CI, RUNTIME_RELEASES_TOKEN may provide a short-lived/read-only GitHub
+# internal CI, RUNTIME_RELEASES_TOKEN (or the existing RUNTIME_GITHUB_TOKEN)
+# may provide a short-lived/read-only GitHub
 # token. It is passed only as an Authorization header and is never printed. The
 # runtime source repository remains private — a public artifact is not open source.
 #
@@ -33,11 +34,41 @@ warn() { printf '%s\n' "$*" >&2; }
 die()  { code=$1; shift; printf 'error: %s\n' "$*" >&2; exit "$code"; }
 
 curl_get() {
-  if [ -n "${RUNTIME_RELEASES_TOKEN:-}" ]; then
-    curl -fsSL -H "Authorization: Bearer ${RUNTIME_RELEASES_TOKEN}" \
+  token=${RUNTIME_RELEASES_TOKEN:-${RUNTIME_GITHUB_TOKEN:-}}
+  if [ -n "$token" ]; then
+    curl -fsSL -H "Authorization: Bearer ${token}" \
       -H 'Accept: application/vnd.github+json' "$@"
   else
     curl -fsSL "$@"
+  fi
+}
+
+curl_asset() {
+  token=${RUNTIME_RELEASES_TOKEN:-${RUNTIME_GITHUB_TOKEN:-}}
+  if [ -n "$token" ]; then
+    curl -fsSL -H "Authorization: Bearer ${token}" \
+      -H 'Accept: application/octet-stream' "$@"
+  else
+    curl -fsSL "$@"
+  fi
+}
+
+download_release_asset() {
+  output=$1
+  asset_name=$2
+  if [ -n "${RUNTIME_RELEASES_TOKEN:-${RUNTIME_GITHUB_TOKEN:-}}" ]; then
+    # Resolve the asset through the authenticated API. This avoids forwarding
+    # the bearer token across the browser-download redirect to release storage.
+    asset_id=$(curl_get "${API}/releases/tags/${version}" | tr ',' '\n' \
+      | awk -v wanted="$asset_name" '
+          /"id"[[:space:]]*:/ { id=$0; sub(/.*:[[:space:]]*/, "", id); sub(/,.*/, "", id) }
+          $0 ~ "\\\"name\\\"[[:space:]]*:[[:space:]]*\\\"" wanted "\\\"" { print id; exit }
+        ')
+    [ -n "$asset_id" ] || return 1
+    curl_asset -o "$output" \
+      "${API}/releases/assets/${asset_id}"
+  else
+    curl_get -o "$output" "${base}/${asset_name}"
   fi
 }
 
@@ -102,12 +133,12 @@ tmp=$(mktemp -d 2>/dev/null || mktemp -d -t engineering-runtime)
 trap "rm -rf '$tmp'" EXIT INT TERM
 
 log "  downloading ${archive}"
-curl_get -o "${tmp}/${archive}" "${base}/${archive}" \
+download_release_asset "${tmp}/${archive}" "$archive" \
   || die 4 "download failed: ${base}/${archive}
 Check that ${version} exists and publishes a ${os}/${arch} archive."
 
 log "  downloading SHA256SUMS.txt"
-curl_get -o "${tmp}/SHA256SUMS.txt" "${base}/SHA256SUMS.txt" \
+download_release_asset "${tmp}/SHA256SUMS.txt" SHA256SUMS.txt \
   || die 4 "could not download the checksum file: ${base}/SHA256SUMS.txt"
 
 log "  verifying checksum"
