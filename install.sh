@@ -3,10 +3,10 @@
 #
 #   curl -fsSL https://raw.githubusercontent.com/engineeringruntime/engineering-runtime-releases/main/install.sh | sh
 #
-# The intended contract is anonymous public release artifacts. If the repository
-# is private, GitHub returns 404 and this installer fails closed; do not add a
-# credential workaround here. The runtime *source* repository remains private —
-# a public artifact is not open source.
+# The intended contract is anonymous public release artifacts. For private
+# internal CI, RUNTIME_RELEASES_TOKEN may provide a short-lived/read-only GitHub
+# token. It is passed only as an Authorization header and is never printed. The
+# runtime source repository remains private — a public artifact is not open source.
 #
 # Environment:
 #   VERSION=v0.8.0      install a specific tag instead of the latest
@@ -31,6 +31,15 @@ API="https://api.github.com/repos/${REPO}"
 log()  { printf '%s\n' "$*"; }
 warn() { printf '%s\n' "$*" >&2; }
 die()  { code=$1; shift; printf 'error: %s\n' "$*" >&2; exit "$code"; }
+
+curl_get() {
+  if [ -n "${RUNTIME_RELEASES_TOKEN:-}" ]; then
+    curl -fsSL -H "Authorization: Bearer ${RUNTIME_RELEASES_TOKEN}" \
+      -H 'Accept: application/vnd.github+json' "$@"
+  else
+    curl -fsSL "$@"
+  fi
+}
 
 need() {
   command -v "$1" >/dev/null 2>&1 || die 3 "'$1' is required but not installed."
@@ -74,7 +83,7 @@ fi
 # --- version ------------------------------------------------------------------
 version="${VERSION:-}"
 if [ -z "$version" ]; then
-  version=$(curl -fsSL "${API}/releases/latest" 2>/dev/null \
+  version=$(curl_get "${API}/releases/latest" 2>/dev/null \
     | sed -n 's/.*"tag_name"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' \
     | head -n 1) || true
   [ -n "$version" ] || die 4 "could not resolve the latest release tag from ${API}.
@@ -93,12 +102,12 @@ tmp=$(mktemp -d 2>/dev/null || mktemp -d -t engineering-runtime)
 trap "rm -rf '$tmp'" EXIT INT TERM
 
 log "  downloading ${archive}"
-curl -fsSL -o "${tmp}/${archive}" "${base}/${archive}" \
+curl_get -o "${tmp}/${archive}" "${base}/${archive}" \
   || die 4 "download failed: ${base}/${archive}
 Check that ${version} exists and publishes a ${os}/${arch} archive."
 
 log "  downloading SHA256SUMS.txt"
-curl -fsSL -o "${tmp}/SHA256SUMS.txt" "${base}/SHA256SUMS.txt" \
+curl_get -o "${tmp}/SHA256SUMS.txt" "${base}/SHA256SUMS.txt" \
   || die 4 "could not download the checksum file: ${base}/SHA256SUMS.txt"
 
 log "  verifying checksum"
