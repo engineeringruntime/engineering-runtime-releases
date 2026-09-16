@@ -131,7 +131,7 @@ done <<EOF
 $members
 EOF
 tar -tvzf "${tmp}/${archive}" | awk -v root="${name}/" '
-  substr($0, 1, 1) ~ /[lcsbp]/ { bad=1 }
+  substr($0, 1, 1) ~ /[hlcsbp]/ { bad=1 }
   index($0, " " root) == 0 && index($0, " " root) == 0 { next }
   END { exit bad }
 ' || die 1 "archive contains an unsupported link or special member"

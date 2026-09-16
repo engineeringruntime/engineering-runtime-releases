@@ -50,4 +50,24 @@ printf '%s\n%s\n' "$(shasum -a 256 "$tmp/good.tar.gz")" "$(shasum -a 256 "$tmp/g
 if PATH="$fakebin:/usr/bin:/bin" ER_FIXTURE="$fixture" VERSION=v0.9.9-rc.1 \
     INSTALL_DIR="$tmp/target" "$repo_dir/install.sh" > "$tmp/duplicate.out" 2>&1; then exit 1; fi
 cmp "$tmp/old-runtime" "$tmp/target/runtime"
+mkdir -p "$tmp/bad/engineering-runtime-v0.9.9-rc.1-darwin-arm64"
+cat > "$tmp/bad/engineering-runtime-v0.9.9-rc.1-darwin-arm64/runtime" <<'BAD'
+#!/bin/sh
+printf 'runtime 0.9.8\n'
+BAD
+chmod 0755 "$tmp/bad/engineering-runtime-v0.9.9-rc.1-darwin-arm64/runtime"
+tar -czf "$fixture/engineering-runtime-v0.9.9-rc.1-darwin-arm64.tar.gz" \
+  -C "$tmp/bad" engineering-runtime-v0.9.9-rc.1-darwin-arm64
+( cd "$fixture" && shasum -a 256 engineering-runtime-v0.9.9-rc.1-darwin-arm64.tar.gz > SHA256SUMS.txt )
+if PATH="$fakebin:/usr/bin:/bin" ER_FIXTURE="$fixture" VERSION=v0.9.9-rc.1 \
+    INSTALL_DIR="$tmp/target" "$repo_dir/install.sh" > "$tmp/version.out" 2>&1; then exit 1; fi
+cmp "$tmp/old-runtime" "$tmp/target/runtime"
+mkdir -p "$tmp/link/engineering-runtime-v0.9.9-rc.1-darwin-arm64"
+ln -s /tmp/should-not-extract "$tmp/link/engineering-runtime-v0.9.9-rc.1-darwin-arm64/escape"
+tar -czf "$fixture/engineering-runtime-v0.9.9-rc.1-darwin-arm64.tar.gz" \
+  -C "$tmp/link" engineering-runtime-v0.9.9-rc.1-darwin-arm64
+( cd "$fixture" && shasum -a 256 engineering-runtime-v0.9.9-rc.1-darwin-arm64.tar.gz > SHA256SUMS.txt )
+if PATH="$fakebin:/usr/bin:/bin" ER_FIXTURE="$fixture" VERSION=v0.9.9-rc.1 \
+    INSTALL_DIR="$tmp/target" "$repo_dir/install.sh" > "$tmp/link.out" 2>&1; then exit 1; fi
+cmp "$tmp/old-runtime" "$tmp/target/runtime"
 printf 'Installer fixtures: PASS (exact checksum, checksum failure preservation, duplicate rejection, atomic staged install)\n'
