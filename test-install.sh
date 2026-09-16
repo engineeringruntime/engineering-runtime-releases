@@ -50,6 +50,16 @@ wait "$pid_a" || exit 1
 wait "$pid_b" || exit 1
 test "$("$tmp/target/runtime" version)" = 'runtime 0.9.9-rc.1'
 cp "$tmp/target/runtime" "$tmp/old-runtime"
+cat > "$tmp/target/runtime" <<'OLD'
+#!/bin/sh
+printf 'runtime 0.9.8\n'
+OLD
+chmod 0755 "$tmp/target/runtime"
+PATH="$fakebin:/usr/bin:/bin" ER_FIXTURE="$fixture" VERSION=v0.9.9-rc.1 \
+  INSTALL_DIR="$tmp/target" "$repo_dir/install.sh" > "$tmp/upgrade.out"
+test "$("$tmp/target/runtime" version)" = 'runtime 0.9.9-rc.1'
+test ! -f "$tmp/target/.runtime.staging.$$"
+cp "$tmp/target/runtime" "$tmp/old-runtime"
 printf '0000000000000000000000000000000000000000000000000000000000000000  engineering-runtime-v0.9.9-rc.1-darwin-arm64.tar.gz\n' > "$fixture/SHA256SUMS.txt"
 if PATH="$fakebin:/usr/bin:/bin" ER_FIXTURE="$fixture" VERSION=v0.9.9-rc.1 \
     INSTALL_DIR="$tmp/target" "$repo_dir/install.sh" > "$tmp/checksum.out" 2>&1; then exit 1; fi
