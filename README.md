@@ -56,6 +56,17 @@ stages the replacement. An existing binary is left in place when any check
 fails. Run `./test-install.sh` in this repository for offline fixture coverage;
 it performs no network or release operation.
 
+Before a public release decision, run the read-only anonymous publication gate:
+
+```bash
+scripts/check-anonymous-assets.sh v0.9.9 darwin arm64
+```
+
+It checks the selected archive and `SHA256SUMS.txt` with unauthenticated HEAD
+requests. A 404 is a publication/visibility failure, not an installer failure;
+the current private repository is expected to fail this gate until access is
+corrected.
+
 | Variable | Effect |
 |---|---|
 | `VERSION=<release-tag>` | Install a specific tag instead of the latest, for example `v0.9.6` |
