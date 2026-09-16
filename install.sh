@@ -145,10 +145,9 @@ chmod +x "$bin" 2>/dev/null || true
 [ -x "$bin" ] || die 1 "the runtime binary inside ${archive} is not executable"
 reported_version=$("$bin" version 2>/dev/null) \
   || die 1 "the runtime binary inside ${archive} could not report its version"
-case "$reported_version" in
-  *"${version#v}"*) ;;
-  *) die 1 "the runtime binary reports '${reported_version}', not ${version}" ;;
-esac
+expected_version="runtime ${version#v}"
+[ "$reported_version" = "$expected_version" ] \
+  || die 1 "the runtime binary reports '${reported_version}', not ${expected_version}"
 
 # --- install ------------------------------------------------------------------
 target=""

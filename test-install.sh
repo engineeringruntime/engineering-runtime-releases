@@ -71,6 +71,17 @@ tar -czf "$fixture/engineering-runtime-v0.9.9-rc.1-darwin-arm64.tar.gz" \
 if PATH="$fakebin:/usr/bin:/bin" ER_FIXTURE="$fixture" VERSION=v0.9.9-rc.1 \
     INSTALL_DIR="$tmp/target" "$repo_dir/install.sh" > "$tmp/version.out" 2>&1; then exit 1; fi
 cmp "$tmp/old-runtime" "$tmp/target/runtime"
+cat > "$tmp/bad/engineering-runtime-v0.9.9-rc.1-darwin-arm64/runtime" <<'BADSUFFIX'
+#!/bin/sh
+printf 'runtime 0.9.9-rc.1+tampered\n'
+BADSUFFIX
+chmod 0755 "$tmp/bad/engineering-runtime-v0.9.9-rc.1-darwin-arm64/runtime"
+tar -czf "$fixture/engineering-runtime-v0.9.9-rc.1-darwin-arm64.tar.gz" \
+  -C "$tmp/bad" engineering-runtime-v0.9.9-rc.1-darwin-arm64
+( cd "$fixture" && shasum -a 256 engineering-runtime-v0.9.9-rc.1-darwin-arm64.tar.gz > SHA256SUMS.txt )
+if PATH="$fakebin:/usr/bin:/bin" ER_FIXTURE="$fixture" VERSION=v0.9.9-rc.1 \
+    INSTALL_DIR="$tmp/target" "$repo_dir/install.sh" > "$tmp/version-suffix.out" 2>&1; then exit 1; fi
+cmp "$tmp/old-runtime" "$tmp/target/runtime"
 mkdir -p "$tmp/link/engineering-runtime-v0.9.9-rc.1-darwin-arm64"
 ln -s /tmp/should-not-extract "$tmp/link/engineering-runtime-v0.9.9-rc.1-darwin-arm64/escape"
 tar -czf "$fixture/engineering-runtime-v0.9.9-rc.1-darwin-arm64.tar.gz" \
@@ -79,4 +90,4 @@ tar -czf "$fixture/engineering-runtime-v0.9.9-rc.1-darwin-arm64.tar.gz" \
 if PATH="$fakebin:/usr/bin:/bin" ER_FIXTURE="$fixture" VERSION=v0.9.9-rc.1 \
     INSTALL_DIR="$tmp/target" "$repo_dir/install.sh" > "$tmp/link.out" 2>&1; then exit 1; fi
 cmp "$tmp/old-runtime" "$tmp/target/runtime"
-printf 'Installer fixtures: PASS (checksum, missing/duplicate refusal, corrupt archive, version mismatch, unsafe link, atomic staged install)\n'
+printf 'Installer fixtures: PASS (checksum, manifest/archive refusal, exact version, unsafe link, atomic staged install)\n'
