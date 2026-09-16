@@ -1,6 +1,9 @@
 # CLAUDE.md — engineering-runtime-releases
 
-**Public release, installation, Discussions and Issues home for Runtime.**
+**Release, installation, Discussions and Issues home for Runtime.** The release
+repository is currently private in GitHub organization metadata; anonymous
+installation is therefore unavailable until the owner restores public artifact
+access. Do not describe authenticated operator access as customer install proof.
 Supportive child of the Runtime product hub.
 
 Product hub: [`../CLAUDE.md`](../CLAUDE.md).
@@ -67,8 +70,10 @@ conversation links:
 Because CI and the public site both read this repo live, a bad or deleted
 Release breaks installs and the website's releases page at the same time.
 
-The repository and its release assets are public. Downloads require no GitHub
-token; `RUNTIME_GITHUB_TOKEN` is only for later governed GitHub operations.
+The intended repository contract is public artifacts and private source. Current
+visibility must be checked at release time; authenticated `gh release download`
+is not anonymous proof. Downloads should require no GitHub token once visibility
+is corrected; `RUNTIME_GITHUB_TOKEN` is only for later governed GitHub operations.
 
 The unreleased v0.9.9 installer hardening verifies exactly one checksum entry
 for the selected archive, rejects unexpected/traversal/symlink/special archive

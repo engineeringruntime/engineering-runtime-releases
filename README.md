@@ -1,6 +1,6 @@
 # Engineering Runtime Releases
 
-This repository is the public home for Engineering Runtime releases,
+This repository is the release home for Engineering Runtime releases,
 installation, Discussions and issue reporting. Runtime source is maintained
 privately; the binaries and checksums published here are public.
 
@@ -42,8 +42,11 @@ curl -fsSL https://raw.githubusercontent.com/engineeringruntime/engineering-runt
 runtime version
 ```
 
-**No GitHub account or token is required** — the release artifacts here are
-public. The installer detects your OS and architecture, verifies the published
+**The intended release contract is anonymous download**, but this repository is
+currently private in GitHub organization metadata (verified 2026-09-16). Until
+visibility/access is corrected, unauthenticated users receive 404 and the
+installer cannot download a release. Once the release repository is public,
+the installer detects your OS and architecture, verifies the published
 SHA256 **before** extracting, and fails closed if it does not match.
 
 The unreleased v0.9.9 installer additionally requires exactly one checksum entry,
@@ -109,7 +112,7 @@ Windows is not covered by the installer: download the `.zip` from the
 
 ## Public artifacts, private source
 
-The **artifacts** published here are public so that anyone — or their AI
+The **artifacts** are intended to be public so that anyone — or their AI
 assistant — can install and run the runtime without credentials. The Engineering
 Runtime **source** repository is maintained separately and remains **private**.
 A public artifact is not open source.

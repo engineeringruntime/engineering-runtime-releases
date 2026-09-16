@@ -3,9 +3,10 @@
 #
 #   curl -fsSL https://raw.githubusercontent.com/engineeringruntime/engineering-runtime-releases/main/install.sh | sh
 #
-# No GitHub account or token is required: this repository publishes the release
-# artifacts publicly. The runtime *source* repository remains private — a public
-# artifact is not open source.
+# The intended contract is anonymous public release artifacts. If the repository
+# is private, GitHub returns 404 and this installer fails closed; do not add a
+# credential workaround here. The runtime *source* repository remains private —
+# a public artifact is not open source.
 #
 # Environment:
 #   VERSION=v0.8.0      install a specific tag instead of the latest
