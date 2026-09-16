@@ -40,6 +40,15 @@ PATH="$fakebin:/usr/bin:/bin" ER_FIXTURE="$fixture" VERSION=v0.9.9-rc.1 \
   INSTALL_DIR="$tmp/target" "$repo_dir/install.sh" > "$tmp/success.out"
 test "$("$tmp/target/runtime" version)" = 'runtime 0.9.9-rc.1'
 test -x "$tmp/target/runtime"
+PATH="$fakebin:/usr/bin:/bin" ER_FIXTURE="$fixture" VERSION=v0.9.9-rc.1 \
+  INSTALL_DIR="$tmp/target" "$repo_dir/install.sh" > "$tmp/concurrent-a.out" 2>&1 &
+pid_a=$!
+PATH="$fakebin:/usr/bin:/bin" ER_FIXTURE="$fixture" VERSION=v0.9.9-rc.1 \
+  INSTALL_DIR="$tmp/target" "$repo_dir/install.sh" > "$tmp/concurrent-b.out" 2>&1 &
+pid_b=$!
+wait "$pid_a" || exit 1
+wait "$pid_b" || exit 1
+test "$("$tmp/target/runtime" version)" = 'runtime 0.9.9-rc.1'
 cp "$tmp/target/runtime" "$tmp/old-runtime"
 printf '0000000000000000000000000000000000000000000000000000000000000000  engineering-runtime-v0.9.9-rc.1-darwin-arm64.tar.gz\n' > "$fixture/SHA256SUMS.txt"
 if PATH="$fakebin:/usr/bin:/bin" ER_FIXTURE="$fixture" VERSION=v0.9.9-rc.1 \
