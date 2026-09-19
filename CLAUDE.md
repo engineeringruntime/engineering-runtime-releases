@@ -13,9 +13,9 @@ ER map: [`../../engineering-runtime-workspace/CLAUDE.md`](../../engineering-runt
 
 ## What this repo is
 
-The **artifacts live in GitHub Releases, not in git**. The tracked tree is
-intentionally just `README.md` + this file — do not "fix" that by committing
-binaries.
+The **artifacts live in GitHub Releases, not in git**. The tracked tree contains
+distribution documentation, `install.sh`, and verification scripts/tests — never
+build outputs or binaries.
 
 | Carried by a GitHub Release | Not in this repo |
 |---|---|
@@ -40,7 +40,8 @@ conversation links:
 ## Hard rules
 
 1. **Never commit binaries, archives, or checksums into git.** They are Release
-   assets. This repo stays docs-only.
+   assets. This repo owns distribution documentation and installer tooling, not
+   Runtime source or generated release bytes.
 2. **This repo does not decide what ships** — `../engineering-runtime` source,
    tests, version metadata and release tag do. Publishing here only distributes
    what that binary already is.

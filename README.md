@@ -2,7 +2,8 @@
 
 This repository is the release home for Engineering Runtime releases,
 installation, Discussions and issue reporting. Runtime source is maintained
-privately; the binaries and checksums published here are public.
+privately; binary/checksum access follows this repository's visibility. The
+intended public distribution path is not yet anonymous while it remains private.
 
 <!-- latest-release:start -->
 ## Latest release — v0.9.8
