@@ -60,12 +60,44 @@ PATH="$fakebin:/usr/bin:/bin" ER_FIXTURE="$fixture" VERSION=v0.9.9-rc.1 \
 test "$("$tmp/target/runtime" version)" = 'runtime 0.9.9-rc.1'
 test ! -f "$tmp/target/.runtime.staging.$$"
 cp "$tmp/target/runtime" "$tmp/old-runtime"
+# A failed destination copy must preserve the old executable AND remove its
+# partial staging artifact. The wrapper affects only the explicit test target.
+cat > "$fakebin/cp" <<'COPYFAIL'
+#!/bin/sh
+case "${2:-}" in
+  "$ER_TARGET"/.runtime*) printf 'partial-copy-canary\n' > "$2"; exit 1 ;;
+  *) exec /bin/cp "$@" ;;
+esac
+COPYFAIL
+chmod 0755 "$fakebin/cp"
+if PATH="$fakebin:/usr/bin:/bin" ER_FIXTURE="$fixture" ER_TARGET="$tmp/target" VERSION=v0.9.9-rc.1 \
+    INSTALL_DIR="$tmp/target" "$repo_dir/install.sh" > "$tmp/copy-failure.out" 2>&1; then exit 1; fi
+cmp "$tmp/old-runtime" "$tmp/target/runtime"
+if [ -n "$(find "$tmp/target" -mindepth 1 -name '.runtime*' -print)" ]; then
+  printf 'FAIL installer left partial staging state after copy failure\n' >&2
+  exit 1
+fi
+rm "$fakebin/cp"
+cat > "$fakebin/mv" <<'MOVEFAIL'
+#!/bin/sh
+if [ "${ER_INTERRUPT:-}" = yes ]; then kill -TERM "$PPID"; fi
+exit 1
+MOVEFAIL
+chmod 0755 "$fakebin/mv"
+for interrupt in no yes; do
+  if PATH="$fakebin:/usr/bin:/bin" ER_FIXTURE="$fixture" ER_INTERRUPT="$interrupt" VERSION=v0.9.9-rc.1 \
+      INSTALL_DIR="$tmp/target" "$repo_dir/install.sh" > "$tmp/rename-$interrupt.out" 2>&1; then exit 1; fi
+  cmp "$tmp/old-runtime" "$tmp/target/runtime"
+  test -z "$(find "$tmp/target" -mindepth 1 -name '.runtime*' -print)"
+done
+rm "$fakebin/mv"
 printf '0000000000000000000000000000000000000000000000000000000000000000  engineering-runtime-v0.9.9-rc.1-darwin-arm64.tar.gz\n' > "$fixture/SHA256SUMS.txt"
 if PATH="$fakebin:/usr/bin:/bin" ER_FIXTURE="$fixture" VERSION=v0.9.9-rc.1 \
     INSTALL_DIR="$tmp/target" "$repo_dir/install.sh" > "$tmp/checksum.out" 2>&1; then exit 1; fi
 cmp "$tmp/old-runtime" "$tmp/target/runtime"
 cp "$tmp/releases/v0.9.9-rc.1/engineering-runtime-v0.9.9-rc.1-darwin-arm64.tar.gz" "$tmp/good.tar.gz"
-printf '%s\n%s\n' "$(shasum -a 256 "$tmp/good.tar.gz")" "$(shasum -a 256 "$tmp/good.tar.gz")" > "$fixture/SHA256SUMS.txt"
+correct_line=$(cd "$fixture" && shasum -a 256 engineering-runtime-v0.9.9-rc.1-darwin-arm64.tar.gz)
+printf '%s\n%s\n' "$correct_line" "$correct_line" > "$fixture/SHA256SUMS.txt"
 if PATH="$fakebin:/usr/bin:/bin" ER_FIXTURE="$fixture" VERSION=v0.9.9-rc.1 \
     INSTALL_DIR="$tmp/target" "$repo_dir/install.sh" > "$tmp/duplicate.out" 2>&1; then exit 1; fi
 cmp "$tmp/old-runtime" "$tmp/target/runtime"
@@ -109,4 +141,11 @@ tar -czf "$fixture/engineering-runtime-v0.9.9-rc.1-darwin-arm64.tar.gz" \
 if PATH="$fakebin:/usr/bin:/bin" ER_FIXTURE="$fixture" VERSION=v0.9.9-rc.1 \
     INSTALL_DIR="$tmp/target" "$repo_dir/install.sh" > "$tmp/link.out" 2>&1; then exit 1; fi
 cmp "$tmp/old-runtime" "$tmp/target/runtime"
-printf 'Installer fixtures: PASS (checksum, manifest/archive refusal, exact version, unsafe link, atomic staged install)\n'
+# Even a checksum-matching archive must not supply the executable twice.
+tar -czf "$fixture/engineering-runtime-v0.9.9-rc.1-darwin-arm64.tar.gz" \
+  -C "$tmp/releases/v0.9.9-rc.1" engineering-runtime-v0.9.9-rc.1-darwin-arm64/runtime engineering-runtime-v0.9.9-rc.1-darwin-arm64/runtime
+( cd "$fixture" && shasum -a 256 engineering-runtime-v0.9.9-rc.1-darwin-arm64.tar.gz > SHA256SUMS.txt )
+if PATH="$fakebin:/usr/bin:/bin" ER_FIXTURE="$fixture" VERSION=v0.9.9-rc.1 \
+    INSTALL_DIR="$tmp/target" "$repo_dir/install.sh" > "$tmp/duplicate-binary.out" 2>&1; then exit 1; fi
+cmp "$tmp/old-runtime" "$tmp/target/runtime"
+printf 'Installer fixtures: PASS (checksum, manifest/archive refusal, exact version, links/duplicate binary, concurrent install, copy/rename/signal cleanup)\n'

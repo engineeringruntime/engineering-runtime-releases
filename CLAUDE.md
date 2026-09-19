@@ -81,8 +81,15 @@ members, requires the expected versioned executable and reports the requested
 version before install. It stages the executable in the destination and atomically
 renames it into place, preserving an existing install when download, checksum,
 archive or staging validation fails. `test-install.sh` is an offline fixture only;
-it does not publish, contact GitHub or replace a user's binary. Windows remains
-outside this POSIX installer until the separate platform-support decision.
+it does not publish, contact GitHub or replace a user's binary. Windows amd64 and
+arm64 use the qualified direct ZIP path, not this POSIX installer.
+
+Stable preparation additionally uses a private random destination-side staging
+directory, cleans partial files on failure/signals, rejects duplicate executable
+members and streams only the exact executable. A failed-copy regression first
+reproduced an orphan with the previous predictable staging filename; the fix must
+pass that control before member 10 can close. No authenticated installer mode is
+added; private CI downloads remain in the CI repository.
 
 ---
 

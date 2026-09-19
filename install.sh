@@ -9,7 +9,7 @@
 # a public artifact is not open source.
 #
 # Environment:
-#   VERSION=v0.8.0      install a specific tag instead of the latest
+#   VERSION=v0.9.9      install a specific tag instead of the latest
 #   INSTALL_DIR=/path   install here instead of the default search
 #
 # Exit codes are deliberately distinct, because an automated caller branches on
@@ -89,8 +89,17 @@ log "Engineering Runtime ${version} (${os}/${arch})"
 
 # --- download + verify --------------------------------------------------------
 tmp=$(mktemp -d 2>/dev/null || mktemp -d -t engineering-runtime)
-# shellcheck disable=SC2064
-trap "rm -rf '$tmp'" EXIT INT TERM
+stage_dir=
+cleanup() {
+  if [ -n "$stage_dir" ]; then
+    rm -f "$stage_dir/runtime"
+    rmdir "$stage_dir" 2>/dev/null || true
+  fi
+  rm -rf "$tmp"
+}
+trap cleanup EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
 
 log "  downloading ${archive}"
 curl -fsSL -o "${tmp}/${archive}" "${base}/${archive}" \
@@ -126,20 +135,22 @@ while IFS= read -r member; do
     *) die 1 "archive contains an unexpected member path" ;;
   esac
   case "$member" in
-    /*|../*|*/../*|*/..|*'/./'*|*/.) die 1 "archive contains an absolute or traversal path" ;;
+    /*|../*|*/../*|*/..|*'/./'*|*/.|*'\'*) die 1 "archive contains an absolute or traversal path" ;;
   esac
 done <<EOF
 $members
 EOF
-tar -tvzf "${tmp}/${archive}" | awk -v root="${name}/" '
-  substr($0, 1, 1) ~ /[hlcsbp]/ { bad=1 }
-  index($0, " " root) == 0 && index($0, " " root) == 0 { next }
+tar -tvzf "${tmp}/${archive}" | awk '
+  substr($0, 1, 1) !~ /[-d]/ { bad=1 }
   END { exit bad }
 ' || die 1 "archive contains an unsupported link or special member"
-tar -xzf "${tmp}/${archive}" -C "$tmp" --no-same-owner --no-same-permissions \
-  || die 1 "could not extract ${archive}"
+binary_count=$(printf '%s\n' "$members" | awk -v expected="${name}/runtime" '$0 == expected { n++ } END { print n+0 }')
+[ "$binary_count" = 1 ] || die 1 "archive must contain exactly one expected runtime executable"
 
-bin="${tmp}/${name}/runtime"
+# Stream only the admitted member; other archive content is never extracted.
+bin="${tmp}/runtime"
+tar -xOzf "${tmp}/${archive}" "${name}/runtime" > "$bin" \
+  || die 1 "could not extract the expected runtime executable"
 [ -f "$bin" ] || die 1 "could not find the expected runtime binary inside ${archive}"
 chmod +x "$bin" 2>/dev/null || true
 [ -x "$bin" ] || die 1 "the runtime binary inside ${archive} is not executable"
@@ -164,8 +175,9 @@ Tried /usr/local/bin and ${target}. Set INSTALL_DIR=/somewhere/on/your/PATH."
   [ -w "$target" ] || die 6 "no writable install directory (${target})."
 fi
 
-staged="${target}/.runtime.staging.$$"
-rm -f "$staged" 2>/dev/null || die 6 "could not prepare an install staging path"
+stage_dir=$(mktemp -d "${target}/.runtime.install.XXXXXXXX") \
+  || die 6 "could not create a private install staging directory"
+staged="${stage_dir}/runtime"
 cp "$bin" "$staged" || die 6 "could not stage the runtime in ${target}"
 chmod 0755 "$staged" 2>/dev/null || die 6 "could not set runtime mode in ${target}"
 mv -f "$staged" "${target}/runtime" \
