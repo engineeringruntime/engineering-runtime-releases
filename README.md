@@ -102,9 +102,17 @@ Windows is not covered by the installer: download the `.zip` from the
 
 ## Public artifacts, private source
 
-The **artifacts** published here are public so that anyone — or their AI
-assistant — can install and run the runtime without credentials. The Engineering
-Runtime **source** repository is maintained separately and remains **private**.
-A public artifact is not open source.
+The **artifacts** published in this repository are publicly available so that
+anyone — or their AI assistant — can install and run Engineering Runtime
+without repository credentials.
+
+Engineering Runtime itself is **proprietary software**. Its source code is
+maintained separately and remains **private**.
+
+Public availability of the compiled artifacts does **not** make Engineering
+Runtime open source.
+
+Use of the Engineering Runtime binaries is subject to the terms in
+[`LICENSE`](./LICENSE).
 
 [latest]: https://github.com/engineeringruntime/engineering-runtime-releases/releases/latest
