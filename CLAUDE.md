@@ -64,12 +64,12 @@ conversation links:
 | Consumer | How |
 |---|---|
 | `../engineering-runtime-ci` | Downloads the release archive, verifies `SHA256SUMS.txt`, puts `runtime` on `PATH` (`.github/actions/setup-runtime/`) |
-| `../engineering-runtime-series` | `releases.md` reads the latest Release live from the GitHub API |
+| `../engineering-runtime-series` | `releases.md` records reviewed publication data and private-access requirements |
 | `../engineering-runtime-docs` | Install + upgrade instructions point users here |
-| End users | Public installer or direct asset download |
+| End users | Authenticated direct download while private; anonymous installer only when archive access is public |
 
-Because CI and the public site both read this repo live, a bad or deleted
-Release breaks installs and the website's releases page at the same time.
+CI reads this repository during installation. The public site keeps a static
+publication/access summary because anonymous API requests currently return 404.
 
 The intended repository contract is public artifacts and private source. Current
 visibility must be checked at release time; authenticated `gh release download`

@@ -35,6 +35,10 @@ brew install engineeringruntime/tap/engineering-runtime
 
 The public [`engineeringruntime/homebrew-tap`](https://github.com/engineeringruntime/homebrew-tap)
 formula supports arm64 and amd64 and verifies the release archive checksum.
+Its archive URLs are currently private: anonymous Homebrew install/upgrade fails
+with 404. A GitHub CLI login does not authenticate Homebrew downloads. Use an
+authorized manual download until anonymous archive access is restored; see
+[installation access requirements](https://docs.engineeringruntime.com/get-started/installation/#current-private-distribution-access).
 
 ### Verification script
 
@@ -44,9 +48,12 @@ runtime version
 ```
 
 **The intended release contract is anonymous download**, but this repository is
-currently private in GitHub organization metadata (verified 2026-09-16). Until
+currently private in GitHub organization metadata (verified 2026-09-20). Until
 visibility/access is corrected, unauthenticated users receive 404 and the
-installer cannot download a release. Once the release repository is public,
+installer cannot download a release. Authorized operators may use `gh release
+download` with repository read access. CI uses the setup action's `release_token`
+input, passed internally as `RUNTIME_RELEASES_TOKEN`; standalone `install.sh`
+does not accept that token. Once the release repository is public,
 the installer detects your OS and architecture, verifies the published
 SHA256 **before** extracting, and fails closed if it does not match.
 
@@ -70,7 +77,7 @@ corrected.
 
 | Variable | Effect |
 |---|---|
-| `VERSION=<release-tag>` | Install a specific tag instead of the latest, for example `v0.9.6` |
+| `VERSION=<release-tag>` | Install a specific tag instead of the latest, for example `v0.9.8` |
 | `INSTALL_DIR=/path` | Install here instead of `/usr/local/bin`, else `~/.local/bin` |
 
 ### Exit codes
