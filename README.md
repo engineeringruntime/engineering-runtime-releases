@@ -5,17 +5,25 @@ See [Install Runtime](https://docs.engineeringruntime.com/get-started/installati
 for archive selection, checksum verification and installation.
 
 <!-- latest-release:start -->
-## Latest release — v0.9.8
+## Latest release — v0.9.9
 
-Published **2026-09-05**. Read the
-[technical release notes](https://docs.engineeringruntime.com/release-notes/).
+Published **2026-09-23**. Read the [technical release notes](https://docs.engineeringruntime.com/release-notes/).
 
-**What changed:** Governed execution after Enterprise enrollment and signed governance sync.
+**What changed:** Engineering Runtime v0.9.9 provides governed execution hardening for macOS and Linux.
+
+| Platform | Architecture | Archive |
+|---|---|---|
+| Linux | amd64 | `engineering-runtime-v0.9.9-linux-amd64.tar.gz` |
+| Linux | arm64 | `engineering-runtime-v0.9.9-linux-arm64.tar.gz` |
+| macOS | amd64 | `engineering-runtime-v0.9.9-darwin-amd64.tar.gz` |
+| macOS | arm64 | `engineering-runtime-v0.9.9-darwin-arm64.tar.gz` |
+
+Verify your archive with `SHA256SUMS.txt`. [Download v0.9.9](https://github.com/engineeringruntime/engineering-runtime-releases/releases/tag/v0.9.9). If you have trouble accessing the artifacts, [contact the project](https://engineeringruntime.com/contact/).
 <!-- latest-release:end -->
 
-## Upcoming v0.9.9
+## Supported platforms
 
-v0.9.9 is unreleased and targets macOS/Linux on amd64 and arm64.
+v0.9.9 supports macOS and Linux on amd64 and arm64.
 Windows support is not yet available in this release and remains under validation.
 
 Verify the SHA-256 checksum for the exact archive before installation.
