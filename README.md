@@ -33,6 +33,18 @@ If you have trouble accessing the release or installation artifacts, please
 [Upgrade guidance](https://docs.engineeringruntime.com/get-started/upgrading/) ·
 [Community](https://github.com/orgs/engineeringruntime/discussions)
 
+### Homebrew (macOS and Linux)
+
+```bash
+brew install engineeringruntime/tap/engineering-runtime
+runtime version
+```
+
+The [`engineeringruntime/homebrew-tap`](https://github.com/engineeringruntime/homebrew-tap)
+formula downloads the same versioned archives listed above and verifies the
+same published SHA256. It supports macOS (Apple Silicon and Intel) and Linux
+(amd64 and arm64); Windows is not yet available.
+
 ## Public artifacts, private source
 
 The **artifacts** published in this repository are publicly available so that
