@@ -1,5 +1,13 @@
 # CLAUDE.md — engineering-runtime-releases
 
+**Namespace rename, v0.10.0 (Runtime ADR-008):** from v0.10.0 the executable is
+`engrt`, archives are `engrt-<version>-<os>-<arch>.tar.gz` (containing
+`engrt-<version>-<os>-<arch>/engrt`), the default Home is `~/.engrt` and
+Runtime-owned variables are `ENGRT_*`. There is no compatibility layer.
+`install.sh` installs only v0.10.0 or later and refuses an earlier `VERSION`;
+it leaves an existing `runtime` untouched and says so. Releases up to v0.9.9
+keep their original `engineering-runtime-*` archives containing `runtime`.
+
 **Owner scope revision, 2026-09-20:** v0.9.9 supports only macOS/Linux amd64 and
 arm64. WINDOWS QUALIFICATION DEFERRED — NOT QUALIFIED FOR V0.9.9. Run
 35501553316 is FAILED / HISTORICAL; it is not a passing qualification. Production
@@ -29,7 +37,7 @@ build outputs or binaries.
 
 | Carried by a GitHub Release | Not in this repo |
 |---|---|
-| Versioned `runtime` binaries per platform | Runtime source code (→ `../engineering-runtime`) |
+| Versioned `engrt` binaries per platform (`runtime` up to v0.9.9) | Runtime source code (→ `../engineering-runtime`) |
 | `SHA256SUMS.txt` checksums | Build/staging scratch (ephemeral in the Runtime release workflow) |
 | Release notes on the Release itself | Customer upgrade guides (→ `../engineering-runtime-docs`) |
 
@@ -73,7 +81,7 @@ conversation links:
 
 | Consumer | How |
 |---|---|
-| `../engineering-runtime-ci` | Downloads the release archive, verifies `SHA256SUMS.txt`, puts `runtime` on `PATH` (`.github/actions/setup-runtime/`) |
+| `../engineering-runtime-ci` | Downloads the release archive, verifies `SHA256SUMS.txt`, puts `engrt` on `PATH` (`.github/actions/setup-runtime/`) |
 | `../engineering-runtime-series` | `releases.md` records reviewed publication data and private-access requirements |
 | `../engineering-runtime-docs` | Install + upgrade instructions point users here |
 | End users | Authenticated direct download while private; anonymous installer only when archive access is public |
@@ -84,7 +92,7 @@ publication/access summary because anonymous API requests currently return 404.
 The intended repository contract is public artifacts and private source. Current
 visibility must be checked at release time; authenticated `gh release download`
 is not anonymous proof. Downloads should require no GitHub token once visibility
-is corrected; `RUNTIME_GITHUB_TOKEN` is only for later governed GitHub operations.
+is corrected; `ENGRT_GITHUB_TOKEN` is only for later governed GitHub operations.
 
 The unreleased v0.9.9 installer hardening verifies exactly one checksum entry
 for the selected archive, rejects unexpected/traversal/symlink/special archive
@@ -116,6 +124,9 @@ When a new version is published here, check in the same effort:
 ## Internal distribution reference (retained from README)
 
 The following is historical operator guidance, not public installation copy.
+It predates v0.10.0: read `runtime` as `engrt`, `engineering-runtime-<version>-*`
+archives as `engrt-<version>-*`, and `RUNTIME_RELEASES_TOKEN` as
+`ENGRT_RELEASES_TOKEN` for v0.10.0 and later.
 For v0.9.9 the publication set is only macOS/Linux amd64 and arm64; Windows
 is deferred and not qualified. Existing v0.9.8 metadata below remains historical.
 

@@ -23,8 +23,15 @@ Verify your archive with `SHA256SUMS.txt`. [Download v0.9.9](https://github.com/
 
 ## Supported platforms
 
-v0.9.9 supports macOS and Linux on amd64 and arm64.
-Windows support is not yet available in this release and remains under validation.
+Engineering Runtime supports macOS and Linux on amd64 and arm64.
+Windows support is not yet available and remains under validation.
+
+From v0.10.0 the command is `engrt`, archives are named
+`engrt-<version>-<os>-<arch>.tar.gz`, the default Runtime Home is `~/.engrt` and
+Runtime environment variables use the `ENGRT_` prefix. Earlier releases shipped
+`runtime` in `engineering-runtime-<version>-<os>-<arch>.tar.gz`; see the
+[upgrade guidance](https://docs.engineeringruntime.com/get-started/upgrading/)
+before moving scripts and CI across.
 
 Verify the SHA-256 checksum for the exact archive before installation.
 If you have trouble accessing the release or installation artifacts, please
@@ -37,7 +44,7 @@ If you have trouble accessing the release or installation artifacts, please
 
 ```bash
 brew install engineeringruntime/tap/engineering-runtime
-runtime version
+engrt version
 ```
 
 The [`engineeringruntime/homebrew-tap`](https://github.com/engineeringruntime/homebrew-tap)
