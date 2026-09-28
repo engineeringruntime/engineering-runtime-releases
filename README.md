@@ -31,7 +31,8 @@ If you have trouble accessing the release or installation artifacts, please
 [contact the Engineering Runtime project](https://engineeringruntime.com/contact/).
 
 [Upgrade guidance](https://docs.engineeringruntime.com/get-started/upgrading/) ·
-[Community](https://github.com/orgs/engineeringruntime/discussions)
+[Community](https://github.com/orgs/engineeringruntime/discussions) ·
+[Report an Issue](https://github.com/engineeringruntime/engineering-runtime-releases/issues)
 
 ### Homebrew (macOS and Linux)
 
