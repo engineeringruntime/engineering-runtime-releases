@@ -74,7 +74,7 @@ conversation links:
 | Consumer | How |
 |---|---|
 | `../engineering-runtime-ci` | Downloads the release archive, verifies `SHA256SUMS.txt`, puts `runtime` on `PATH` (`.github/actions/setup-runtime/`) |
-| `../engineering-runtime-series` | `releases.md` records reviewed publication data and private-access requirements |
+| `../engineering-runtime-website` | `releases.md` records reviewed publication data and private-access requirements |
 | `../engineering-runtime-docs` | Install + upgrade instructions point users here |
 | End users | Authenticated direct download while private; anonymous installer only when archive access is public |
 
@@ -110,7 +110,7 @@ When a new version is published here, check in the same effort:
 | Also update | Why |
 |---|---|
 | `../engineering-runtime-docs` release notes | Upgrade impact for existing users |
-| `../engineering-runtime-series` releases landing | Public download story |
+| `../engineering-runtime-website` releases landing | Public download story |
 | `../engineering-runtime-ci` pinned version (if pinned) | Keep install proofs on a real asset |
 
 ## Internal distribution reference (retained from README)
