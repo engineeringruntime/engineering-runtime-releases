@@ -10,13 +10,15 @@ arch=${3:-}
   printf 'usage: %s VERSION OS ARCH\n' "$0" >&2
   exit 2
 }
-case "$version" in v[0-9]*[0-9]) ;; *) echo "VERSION must look like v0.9.9" >&2; exit 2;; esac
-case "$os" in darwin|linux) ;; *) echo "OS must be darwin or linux" >&2; exit 2;; esac
+case "$version" in v[0-9]*[0-9]) ;; *) echo "VERSION must look like v0.10.0" >&2; exit 2;; esac
+case "$os" in darwin|linux|windows) ;; *) echo "OS must be darwin, linux or windows" >&2; exit 2;; esac
 case "$arch" in amd64|arm64) ;; *) echo "ARCH must be amd64 or arm64" >&2; exit 2;; esac
 
 repo=engineeringruntime/engineering-runtime-releases
 base="https://github.com/${repo}/releases/download/${version}"
-archive="engineering-runtime-${version}-${os}-${arch}.tar.gz"
+extension=tar.gz
+[ "$os" != windows ] || extension=zip
+archive="engrt-${version}-${os}-${arch}.${extension}"
 
 check_url() {
   url=$1

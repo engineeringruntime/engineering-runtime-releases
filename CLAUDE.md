@@ -1,5 +1,12 @@
 # CLAUDE.md — engineering-runtime-releases
 
+**v0.10.0 distribution preparation, unreleased:** candidate installer tooling uses
+`engrt` archives and installs only `engrt`, without a `runtime` alias. The shell
+installer remains macOS/Linux-only; Windows uses checksum-verified ZIP/manual
+installation. The anonymous asset check now selects both Windows architectures.
+Keep this branch unpublished until the matching qualified release is authorized;
+current stable v0.9.9 metadata and generated README block remain unchanged.
+
 **Owner scope revision, 2026-09-20:** v0.9.9 supports only macOS/Linux amd64 and
 arm64. WINDOWS QUALIFICATION DEFERRED — NOT QUALIFIED FOR V0.9.9. Run
 35501553316 is FAILED / HISTORICAL; it is not a passing qualification. Production

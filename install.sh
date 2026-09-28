@@ -8,8 +8,11 @@
 # credential workaround here. The runtime *source* repository remains private —
 # a public artifact is not open source.
 #
+# v0.10.0 and later use engrt archives and install only engrt; no runtime alias.
+# Keep this candidate installer unpublished until the matching release is approved.
+#
 # Environment:
-#   VERSION=v0.9.9      install a specific tag instead of the latest
+#   VERSION=v0.10.0      install a specific tag instead of the latest
 #   INSTALL_DIR=/path   install here instead of the default search
 #
 # Exit codes are deliberately distinct, because an automated caller branches on
@@ -46,7 +49,7 @@ case "$os" in
   MINGW*|MSYS*|CYGWIN*|Windows_NT)
     die 2 "Windows is not supported by this script.
 Download the .zip for your architecture from
-https://github.com/${REPO}/releases/latest and add runtime.exe to your PATH." ;;
+https://github.com/${REPO}/releases/latest and add engrt.exe to your PATH." ;;
   *) die 2 "unsupported operating system: ${os}" ;;
 esac
 
@@ -81,7 +84,7 @@ if [ -z "$version" ]; then
 Set VERSION=vX.Y.Z to pin a version explicitly."
 fi
 
-name="engineering-runtime-${version}-${os}-${arch}"
+name="engrt-${version}-${os}-${arch}"
 archive="${name}.tar.gz"
 base="https://github.com/${REPO}/releases/download/${version}"
 
@@ -92,7 +95,7 @@ tmp=$(mktemp -d 2>/dev/null || mktemp -d -t engineering-runtime)
 stage_dir=
 cleanup() {
   if [ -n "$stage_dir" ]; then
-    rm -f "$stage_dir/runtime"
+    rm -f "$stage_dir/engrt"
     rmdir "$stage_dir" 2>/dev/null || true
   fi
   rm -rf "$tmp"
@@ -126,7 +129,7 @@ Do not use this file; retry, and if it fails again report it."
 
 # --- extract ------------------------------------------------------------------
 # The archive expands to a versioned directory containing the binary alongside
-# README/LICENSE and reference material — not a bare ./runtime.
+# README/LICENSE and reference material — not a bare ./engrt.
 members=$(tar -tzf "${tmp}/${archive}") \
   || die 1 "could not inspect ${archive}"
 while IFS= read -r member; do
@@ -144,19 +147,19 @@ tar -tvzf "${tmp}/${archive}" | awk '
   substr($0, 1, 1) !~ /[-d]/ { bad=1 }
   END { exit bad }
 ' || die 1 "archive contains an unsupported link or special member"
-binary_count=$(printf '%s\n' "$members" | awk -v expected="${name}/runtime" '$0 == expected { n++ } END { print n+0 }')
+binary_count=$(printf '%s\n' "$members" | awk -v expected="${name}/engrt" '$0 == expected { n++ } END { print n+0 }')
 [ "$binary_count" = 1 ] || die 1 "archive must contain exactly one expected runtime executable"
 
 # Stream only the admitted member; other archive content is never extracted.
-bin="${tmp}/runtime"
-tar -xOzf "${tmp}/${archive}" "${name}/runtime" > "$bin" \
+bin="${tmp}/engrt"
+tar -xOzf "${tmp}/${archive}" "${name}/engrt" > "$bin" \
   || die 1 "could not extract the expected runtime executable"
 [ -f "$bin" ] || die 1 "could not find the expected runtime binary inside ${archive}"
 chmod +x "$bin" 2>/dev/null || true
 [ -x "$bin" ] || die 1 "the runtime binary inside ${archive} is not executable"
 reported_version=$("$bin" version 2>/dev/null) \
   || die 1 "the runtime binary inside ${archive} could not report its version"
-expected_version="runtime ${version#v}"
+expected_version="engrt ${version#v}"
 [ "$reported_version" = "$expected_version" ] \
   || die 1 "the runtime binary reports '${reported_version}', not ${expected_version}"
 
@@ -175,20 +178,20 @@ Tried /usr/local/bin and ${target}. Set INSTALL_DIR=/somewhere/on/your/PATH."
   [ -w "$target" ] || die 6 "no writable install directory (${target})."
 fi
 
-stage_dir=$(mktemp -d "${target}/.runtime.install.XXXXXXXX") \
+stage_dir=$(mktemp -d "${target}/.engrt.install.XXXXXXXX") \
   || die 6 "could not create a private install staging directory"
-staged="${stage_dir}/runtime"
+staged="${stage_dir}/engrt"
 cp "$bin" "$staged" || die 6 "could not stage the runtime in ${target}"
 chmod 0755 "$staged" 2>/dev/null || die 6 "could not set runtime mode in ${target}"
-mv -f "$staged" "${target}/runtime" \
+mv -f "$staged" "${target}/engrt" \
   || die 6 "could not atomically replace runtime in ${target}"
 
 # --- report -------------------------------------------------------------------
-installed=$("${target}/runtime" version 2>/dev/null || echo "${version}")
+installed=$("${target}/engrt" version 2>/dev/null || echo "${version}")
 
 log ""
 log "Installed ${installed}"
-log "  location: ${target}/runtime"
+log "  location: ${target}/engrt"
 
 case ":${PATH}:" in
   *":${target}:"*) on_path=yes ;;
@@ -204,7 +207,7 @@ fi
 
 log ""
 log "Next:"
-log "  runtime config validate  # confirm the install"
+log "  engrt config validate  # confirm the install"
 log ""
 log "The Runtime Home is created by the first command you run - there is no"
 log "separate setup step. Governance is deliberately not created for you:"

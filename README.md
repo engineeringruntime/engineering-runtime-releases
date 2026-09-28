@@ -4,6 +4,22 @@ Engineering Runtime is a single binary for governed engineering operations.
 See [Install Runtime](https://docs.engineeringruntime.com/get-started/installation/)
 for archive selection, checksum verification and installation.
 
+## v0.10.0 candidate distribution preparation
+
+v0.10.0 is not released. Its intended archives are `engrt-v0.10.0-<os>-<arch>`:
+macOS/Linux use `.tar.gz`; Windows amd64/arm64 use `.zip`. Each contains a
+versioned directory with `engrt` or `engrt.exe`. The candidate shell installer
+installs only `engrt` on macOS/Linux, retaining an existing `runtime` executable
+without creating an alias. Windows installation is manual after verifying the
+unique matching archive checksum; use `Get-Command engrt -All` to verify PATH.
+
+This branch's installer must ship together with the qualified v0.10.0 release;
+it is not the installer for the current stable v0.9.9 archives below. Keep the
+candidate branch unpublished until native six-platform qualification and owner
+publication approval. See the [candidate Windows instructions](https://docs.engineeringruntime.com/get-started/installation/#v0100-windows-candidate-preparation)
+when the matching documentation is published. No binaries or generated release
+metadata are committed by this preparation.
+
 <!-- latest-release:start -->
 ## Latest release — v0.9.9
 
