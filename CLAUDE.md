@@ -265,3 +265,9 @@ Runtime **source** repository is maintained separately and remains **private**.
 A public artifact is not open source.
 
 [latest]: https://github.com/engineeringruntime/engineering-runtime-releases/releases/latest
+
+The candidate shell installer supports only v0.10.0 and later. A pre-0.10.0
+`VERSION` pin exits 1 with explicit rollback guidance before asset downloads or
+destination writes. Older releases retain `engineering-runtime-*` archives and
+`runtime`; use their checksum-verified manual installation in a separate
+destination and Home. Existing stable installer/publication is unchanged.

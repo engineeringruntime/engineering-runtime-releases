@@ -84,6 +84,30 @@ if [ -z "$version" ]; then
 Set VERSION=vX.Y.Z to pin a version explicitly."
 fi
 
+# This installer deliberately owns only the new machine namespace. Old releases
+# have different archive/member/binary names; never guess a new name for them.
+release_number=${version#v}
+printf '%s\n' "$release_number" | awk '
+  /^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?$/ {
+    split($0, parts, ".")
+    split(parts[3], patch, /[-+]/)
+    if (parts[1] ~ /^0[0-9]/ || parts[2] ~ /^0[0-9]/ || patch[1] ~ /^0[0-9]/) exit 1
+    exit 0
+  }
+  { exit 1 }
+' || die 1 "invalid release tag: ${version}. Expected vX.Y.Z (optional prerelease/build suffix)."
+major=${release_number%%.*}
+rest=${release_number#*.}
+minor=${rest%%.*}
+if [ "$major" = 0 ]; then
+  case "$minor" in
+    0|1|2|3|4|5|6|7|8|9)
+      die 1 "this engrt installer supports v0.10.0 and later, not ${version}.
+For an older release or rollback, use that release's checksum-verified manual installation of the runtime binary in a separate destination and Home.
+Nothing has been installed." ;;
+  esac
+fi
+
 name="engrt-${version}-${os}-${arch}"
 archive="${name}.tar.gz"
 base="https://github.com/${REPO}/releases/download/${version}"

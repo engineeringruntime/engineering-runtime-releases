@@ -36,6 +36,45 @@ case "${1:-}" in -s) printf 'Darwin\n';; -m) printf 'arm64\n';; esac
 UNAME
 chmod 0755 "$fakebin/uname"
 fixture="$tmp/releases/v0.10.0"
+# Reject legacy pins before any download or destination creation, with guidance.
+cat > "$fakebin/curl" <<'NODOWNLOAD'
+#!/bin/sh
+printf 'unexpected-download\n' >> "$ER_DOWNLOAD_MARKER"
+exit 99
+NODOWNLOAD
+for old in v0.9.9 0.9.9 v0.9.10 v0.1.0; do
+  status=0
+  PATH="$fakebin:/usr/bin:/bin" ER_DOWNLOAD_MARKER="$tmp/download-marker" VERSION="$old" \
+    INSTALL_DIR="$tmp/legacy-refusal-target" "$repo_dir/install.sh" > "$tmp/legacy-refusal.out" 2>&1 || status=$?
+  test "$status" = 1
+  grep -q 'supports v0.10.0 and later' "$tmp/legacy-refusal.out"
+  test ! -e "$tmp/download-marker"
+  test ! -e "$tmp/legacy-refusal-target"
+done
+# Current/future/prerelease pins reach asset download rather than legacy refusal.
+for supported in v0.10.0 v0.11.0 v1.0.0 v0.10.0-rc.1+build.7; do
+  status=0
+  PATH="$fakebin:/usr/bin:/bin" ER_DOWNLOAD_MARKER="$tmp/download-marker" VERSION="$supported" \
+    INSTALL_DIR="$tmp/legacy-refusal-target" "$repo_dir/install.sh" > "$tmp/supported-pin.out" 2>&1 || status=$?
+  test "$status" = 4
+  test -f "$tmp/download-marker"
+  rm "$tmp/download-marker"
+  test ! -e "$tmp/legacy-refusal-target"
+done
+cat > "$fakebin/curl" <<'CURL'
+#!/bin/sh
+set -eu
+output=
+url=
+while [ "$#" -gt 0 ]; do
+  case "$1" in -o) output=$2; shift 2;; *) url=$1; shift;; esac
+done
+case "$url" in
+  */releases/download/v0.10.0/*) file=${url##*/}; cp "$ER_FIXTURE/$file" "$output";;
+  *) exit 1;;
+esac
+CURL
+chmod 0755 "$fakebin/curl"
 # The namespace transition installs engrt without overwriting or aliasing runtime.
 printf 'old runtime canary\n' > "$tmp/target/runtime"
 cp "$tmp/target/runtime" "$tmp/legacy-runtime-canary"
@@ -153,4 +192,4 @@ tar -czf "$fixture/engrt-v0.10.0-darwin-arm64.tar.gz" \
 if PATH="$fakebin:/usr/bin:/bin" ER_FIXTURE="$fixture" VERSION=v0.10.0 \
     INSTALL_DIR="$tmp/target" "$repo_dir/install.sh" > "$tmp/duplicate-binary.out" 2>&1; then exit 1; fi
 cmp "$tmp/old-runtime" "$tmp/target/engrt"
-printf 'Installer fixtures: PASS (checksum, manifest/archive refusal, exact version, links/duplicate binary, concurrent install, copy/rename/signal cleanup)\n'
+printf 'Installer fixtures: PASS (legacy-version refusal without downloads/writes, checksum, manifest/archive refusal, exact version, links/duplicate binary, concurrent install, copy/rename/signal cleanup)\n'
