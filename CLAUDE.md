@@ -1,5 +1,12 @@
 # CLAUDE.md — engineering-runtime-releases
 
+**2026-10-01 private stable publication:** v0.10.0 is published and Latest with
+six qualified engrt archives and both metadata assets. Runtime tag/source remains
+9b52d804; metadata-only recovery 36827309060 corrected the original publisher's
+post-upload README failure without replacing bytes. The Latest block is generated
+from the actual release. Visibility remains private; anonymous installer and
+Homebrew activation remain deferred. Earlier preparation limits below are historical.
+
 **v0.10.0 distribution preparation, unreleased:** candidate installer tooling uses
 `engrt` archives and installs only `engrt`, without a `runtime` alias. The shell
 installer remains macOS/Linux-only; Windows uses checksum-verified ZIP/manual

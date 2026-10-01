@@ -4,21 +4,21 @@ Engineering Runtime is a single binary for governed engineering operations.
 See [Install Runtime](https://docs.engineeringruntime.com/get-started/installation/)
 for archive selection, checksum verification and installation.
 
-## v0.10.0 candidate distribution preparation
+## v0.10.0 distribution
 
-v0.10.0 is not released. Its intended archives are `engrt-v0.10.0-<os>-<arch>`:
-macOS/Linux use `.tar.gz`; Windows amd64/arm64 use `.zip`. Each contains a
-versioned directory with `engrt` or `engrt.exe`. The candidate shell installer
-installs only `engrt` on macOS/Linux, retaining an existing `runtime` executable
-without creating an alias. Windows installation is manual after verifying the
-unique matching archive checksum; use `Get-Command engrt -All` to verify PATH.
+v0.10.0 is published through restricted release access. Its archives are
+`engrt-v0.10.0-<os>-<arch>`: macOS/Linux use `.tar.gz`; Windows amd64/arm64
+use `.zip`. Each contains a versioned directory with `engrt` or `engrt.exe`.
+All six published archives match their successful native qualification bytes.
 
-This branch's installer must ship together with the qualified v0.10.0 release;
-it is not the installer for the current stable v0.9.9 archives below. Keep the
-candidate branch unpublished until native six-platform qualification and owner
-publication approval. See the [candidate Windows instructions](https://docs.engineeringruntime.com/get-started/installation/#v0100-windows-candidate-preparation)
-when the matching documentation is published. No binaries or generated release
-metadata are committed by this preparation.
+The shell installer installs only `engrt` on macOS/Linux, retaining an existing
+`runtime` executable without creating an alias. It requires anonymous artifact
+access, which is not enabled for this private release. Authorized operators can
+obtain archives with `gh release download v0.10.0 -R engineeringruntime/engineering-runtime-releases`
+and follow the checksum-verified [manual installation guide](https://docs.engineeringruntime.com/get-started/installation/).
+Windows uses checksum-verified manual ZIP installation;
+use `Get-Command engrt -All` to verify PATH. No binaries or checksums are committed
+in the repository; they remain GitHub Release assets.
 
 <!-- latest-release:start -->
 ## Latest release — v0.10.0
@@ -41,8 +41,8 @@ Verify your archive with `SHA256SUMS.txt`. For release access, [contact the proj
 
 ## Supported platforms
 
-v0.9.9 supports macOS and Linux on amd64 and arm64.
-Windows support is not yet available in this release and remains under validation.
+v0.10.0 supports macOS, Linux and Windows on amd64 and arm64.
+v0.9.9 retains its historical macOS/Linux-only support scope.
 
 Verify the SHA-256 checksum for the exact archive before installation.
 If you have trouble accessing the release or installation artifacts, please
@@ -52,35 +52,31 @@ If you have trouble accessing the release or installation artifacts, please
 [Community](https://github.com/orgs/engineeringruntime/discussions) ·
 [Report an Issue](https://github.com/engineeringruntime/engineering-runtime-releases/issues)
 
-### Homebrew (macOS and Linux)
+### Homebrew (macOS and Linux) — deferred
 
-```bash
-brew install engineeringruntime/tap/engineering-runtime
-runtime version
-```
+The v0.10.0 formula is prepared from the published checksums in tap PR #4, but
+its activation and four-platform install verification are deferred until the
+owner enables the distribution path. Use authorized manual installation for now.
+A GitHub CLI login does not authenticate Homebrew's archive downloads. Windows
+uses manual ZIP installation and is outside the formula.
 
-The [`engineeringruntime/homebrew-tap`](https://github.com/engineeringruntime/homebrew-tap)
-formula downloads the same versioned archives listed above and verifies the
-same published SHA256. It supports macOS (Apple Silicon and Intel) and Linux
-(amd64 and arm64); Windows is not yet available.
+## Distribution access and source
 
-## Public artifacts, private source
-
-The **artifacts** published in this repository are publicly available so that
-anyone — or their AI assistant — can install and run Engineering Runtime
-without repository credentials.
+This release repository remains private. Authenticated operator/CI downloads
+have been verified; anonymous installation, Homebrew activation and public
+launch are separate owner decisions. Repository visibility does not change as
+a side effect of publishing a new version. For access, [contact the project](https://engineeringruntime.com/contact/).
 
 Engineering Runtime itself is **proprietary software**. Its source code is
 maintained separately and remains **private**.
 
-Public availability of the compiled artifacts does **not** make Engineering
-Runtime open source.
+Making compiled artifacts available does **not** make Engineering Runtime open source.
 
 Use of the Engineering Runtime binaries is subject to the terms in
 [`LICENSE`](./LICENSE).
 
-The candidate shell installer supports only v0.10.0 and later. A pre-0.10.0
+The v0.10.0 shell installer supports only v0.10.0 and later. A pre-0.10.0
 `VERSION` pin exits 1 with explicit rollback guidance before asset downloads or
 destination writes. Older releases retain `engineering-runtime-*` archives and
 `runtime`; use their checksum-verified manual installation in a separate
-destination and Home. Existing stable installer/publication is unchanged.
+destination and Home. No automatic downgrade or migration is performed.
