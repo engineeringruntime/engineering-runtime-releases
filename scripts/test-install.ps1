@@ -100,6 +100,13 @@ try {
     Install-Engrt -Version $version -InstallDirectory $destination -GitHubCLI
     Assert-True ((Get-FileHash -LiteralPath $target).Hash -ieq $row[0].binary_sha256) 'Authenticated install digest mismatch'
     $cases.Add(@{name='authenticated-published-download';status='passed'})
+    # Exercise the script entry point and Latest selection, not only its function.
+    & (Join-Path $PSScriptRoot '../install.ps1') -Version $version -InstallDirectory $destination -ArchiveDirectory $PublishedDirectory
+    Assert-True ((Get-FileHash -LiteralPath $target).Hash -ieq $row[0].binary_sha256) 'Script entry point digest mismatch'
+    $cases.Add(@{name='script-entry-point';status='passed'})
+    Install-Engrt -InstallDirectory $destination -GitHubCLI
+    Assert-True ((Get-FileHash -LiteralPath $target).Hash -ieq $row[0].binary_sha256) 'Latest install digest mismatch'
+    $cases.Add(@{name='authenticated-latest';status='passed'})
     $report = @{status='passed';architecture=$arch;version=$version;source=$provenance.source_revision;binary_sha256=$row[0].binary_sha256;cases=$cases}
     if ($env:ENGRT_INSTALL_REPORT) { $report | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $env:ENGRT_INSTALL_REPORT }
     "Windows installer: $($cases.Count) cases PASS on native $arch"
