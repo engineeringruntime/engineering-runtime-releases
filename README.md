@@ -21,20 +21,22 @@ when the matching documentation is published. No binaries or generated release
 metadata are committed by this preparation.
 
 <!-- latest-release:start -->
-## Latest release — v0.9.9
+## Latest release — v0.10.0
 
-Published **2026-09-23**. Read the [technical release notes](https://docs.engineeringruntime.com/release-notes/).
+Published **2026-10-01**. Read the [technical release notes](https://docs.engineeringruntime.com/release-notes/).
 
-**What changed:** Engineering Runtime v0.9.9 provides governed execution hardening for macOS and Linux.
+**What changed:** Capability contracts, engrt naming, bounded safety and six native platforms.
 
 | Platform | Architecture | Archive |
 |---|---|---|
-| Linux | amd64 | `engineering-runtime-v0.9.9-linux-amd64.tar.gz` |
-| Linux | arm64 | `engineering-runtime-v0.9.9-linux-arm64.tar.gz` |
-| macOS | amd64 | `engineering-runtime-v0.9.9-darwin-amd64.tar.gz` |
-| macOS | arm64 | `engineering-runtime-v0.9.9-darwin-arm64.tar.gz` |
+| Linux | amd64 | `engrt-v0.10.0-linux-amd64.tar.gz` |
+| Linux | arm64 | `engrt-v0.10.0-linux-arm64.tar.gz` |
+| macOS | amd64 | `engrt-v0.10.0-darwin-amd64.tar.gz` |
+| macOS | arm64 | `engrt-v0.10.0-darwin-arm64.tar.gz` |
+| Windows | amd64 | `engrt-v0.10.0-windows-amd64.zip` |
+| Windows | arm64 | `engrt-v0.10.0-windows-arm64.zip` |
 
-Verify your archive with `SHA256SUMS.txt`. [Download v0.9.9](https://github.com/engineeringruntime/engineering-runtime-releases/releases/tag/v0.9.9). If you have trouble accessing the artifacts, [contact the project](https://engineeringruntime.com/contact/).
+Verify your archive with `SHA256SUMS.txt`. For release access, [contact the project](https://engineeringruntime.com/contact/).
 <!-- latest-release:end -->
 
 ## Supported platforms
