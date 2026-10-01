@@ -1,0 +1,46 @@
+name: Windows published-release installer
+on:
+  push:
+    branches: [main, codex/windows-powershell-installer]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  install:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: windows-2022
+            arch: amd64
+          - runner: windows-11-arm
+            arch: arm64
+    runs-on: ${{ matrix.runner }}
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Obtain published native fixtures
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $dir = Join-Path $env:RUNNER_TEMP 'published-installer-input'
+          New-Item -ItemType Directory -Path $dir | Out-Null
+          gh release download v0.10.0 -R engineeringruntime/engineering-runtime-releases --pattern 'engrt-v0.10.0-windows-${{ matrix.arch }}.zip' --pattern SHA256SUMS.txt --pattern PROVENANCE.json --dir $dir
+          if ($LASTEXITCODE -ne 0) { throw 'Published fixture download failed' }
+      - name: Execute native installer and refusal fixtures
+        shell: pwsh
+        env:
+          ENGRT_INSTALL_REPORT: ${{ runner.temp }}/windows-installer-result.json
+        run: ./scripts/test-install.ps1 -PublishedDirectory (Join-Path $env:RUNNER_TEMP 'published-installer-input')
+      - name: Retain native installer result
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: windows-installer-${{ matrix.arch }}-${{ github.sha }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/windows-installer-result.json
+          if-no-files-found: warn

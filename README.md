@@ -16,7 +16,7 @@ The shell installer installs only `engrt` on macOS/Linux, retaining an existing
 access, which is not enabled for this private release. Authorized operators can
 obtain archives with `gh release download v0.10.0 -R engineeringruntime/engineering-runtime-releases`
 and follow the checksum-verified [manual installation guide](https://docs.engineeringruntime.com/get-started/installation/).
-Windows uses checksum-verified manual ZIP installation;
+Windows supports the checksum-verified `install.ps1` installer and manual ZIP installation;
 use `Get-Command engrt -All` to verify PATH. No binaries or checksums are committed
 in the repository; they remain GitHub Release assets.
 
@@ -86,43 +86,34 @@ The expected version is `engrt 0.10.0`. Keep the PATH setting in your shell prof
 
 ### PowerShell 7 / Windows
 
-Select `amd64` for x64 Windows or `arm64` for Windows on Arm. This downloads and
-verifies the published ZIP before installing `engrt.exe`:
+The installer selects x64 or Arm64 automatically, verifies the ZIP checksum and
+executable version, and installs only `engrt.exe` in `~/.local/bin`.
+It requires PowerShell 7 or later:
 
 ```powershell
 $ErrorActionPreference = 'Stop'
-# Authenticate once, if needed.
+# Authenticate once with an account that has release access.
 gh auth login
-
-$version = 'v0.10.0'
-$arch = 'amd64' # Change to 'arm64' for Windows on Arm.
-$package = "engrt-$version-windows-$arch"
-$archive = "$package.zip"
-$work = Join-Path ([IO.Path]::GetTempPath()) ('engrt-install-' + [guid]::NewGuid().ToString('N'))
-New-Item -ItemType Directory -Path $work | Out-Null
-gh release download $version -R engineeringruntime/engineering-runtime-releases `
-  --pattern $archive --pattern SHA256SUMS.txt --dir $work
-if ($LASTEXITCODE -ne 0) { throw 'Release download failed' }
-$entries = @(Get-Content (Join-Path $work 'SHA256SUMS.txt') | Where-Object {
-  $_ -match ('^[0-9a-fA-F]{64} [ *]' + [regex]::Escape($archive) + '$')
-})
-if ($entries.Count -ne 1) { throw 'Missing or ambiguous checksum entry' }
-$zip = Join-Path $work $archive
-if ((Get-FileHash -Algorithm SHA256 $zip).Hash -ine $entries[0].Substring(0, 64)) {
-  throw 'Checksum mismatch'
-}
-Expand-Archive -LiteralPath $zip -DestinationPath (Join-Path $work 'extracted')
-$bin = Join-Path $HOME '.local\bin'
-New-Item -ItemType Directory -Force -Path $bin | Out-Null
-Copy-Item -LiteralPath (Join-Path $work "extracted/$package/engrt.exe") -Destination (Join-Path $bin 'engrt.exe')
-$env:PATH = "$bin;$env:PATH"
+if ($LASTEXITCODE -ne 0) { throw 'GitHub authentication failed' }
+gh api repos/engineeringruntime/engineering-runtime-releases/contents/install.ps1 `
+  -H 'Accept: application/vnd.github.raw+json' > install.ps1
+if ($LASTEXITCODE -ne 0) { throw 'Installer download failed' }
+./install.ps1 -Version v0.10.0 -GitHubCLI
+$env:PATH = "$HOME\.local\bin;$env:PATH"
 engrt version
-if ($LASTEXITCODE -ne 0) { throw 'Installed executable did not run' }
 ```
 
-The expected version is `engrt 0.10.0`. Add `%USERPROFILE%\.local\bin` to your **user PATH** for future terminals.
-Windows currently uses checksum-verified ZIP installation; there is no published
-`install.ps1` shortcut yet.
+The expected version is `engrt 0.10.0`. Add `%USERPROFILE%\.local\bin` to your
+**user PATH** for future terminals. The script does not edit persistent PATH,
+migrate Runtime Home, or remove an earlier `runtime.exe`.
+
+Omit `-Version` to select Latest. Use `-InstallDirectory C:\Tools\engrt` for a
+custom destination. `VERSION` and `INSTALL_DIR` environment variables are also
+supported. For an offline install, supply `-Version v0.10.0 -ArchiveDirectory`
+pointing to a folder containing the native ZIP and `SHA256SUMS.txt`.
+Stable v0.10.0 and later are supported; older releases use separate manual
+installation. Private downloads require `-GitHubCLI`; public downloads are the
+default. The version probe uses a disposable Home before replacing the executable.
 
 ### Public installation shortcuts — available after owner activation
 
@@ -140,6 +131,13 @@ engrt version
 ```sh
 # Shell installer (macOS / Linux) — after public artifact access.
 curl -fsSL https://raw.githubusercontent.com/engineeringruntime/engineering-runtime-releases/main/install.sh | sh
+engrt version
+```
+
+```powershell
+# PowerShell 7 (Windows) — after public artifact access.
+irm https://raw.githubusercontent.com/engineeringruntime/engineering-runtime-releases/main/install.ps1 | iex
+$env:PATH = "$HOME\.local\bin;$env:PATH"
 engrt version
 ```
 

@@ -278,3 +278,19 @@ The candidate shell installer supports only v0.10.0 and later. A pre-0.10.0
 destination writes. Older releases retain `engineering-runtime-*` archives and
 `runtime`; use their checksum-verified manual installation in a separate
 destination and Home. Existing stable installer/publication is unchanged.
+
+## Windows PowerShell installer (2026-10-01)
+
+`install.ps1` requires native Windows and PowerShell 7+. It supports public
+downloads, explicitly authenticated `-GitHubCLI`, and offline `-ArchiveDirectory`
+with an explicit stable version. It verifies archive checksums and ZIP members,
+probes the executable in a disposable Home, then replaces only `engrt.exe`.
+No persistent PATH, operator Home, old `runtime.exe`, or release bytes are changed.
+Private repositories require authenticated access; the public shortcut remains
+conditional on owner activation.
+
+Run `scripts/test-install.ps1 -PublishedDirectory <fixtures>` on native Windows
+x64 and Arm64. Fixtures contain the published native ZIP, SHA256SUMS.txt and
+PROVENANCE.json; the workflow tests real installation, reinstall, Latest, script
+entry, authenticated download and refusals that preserve an existing install.
+These installer checks supplement, rather than replace, frozen binary evidence.
