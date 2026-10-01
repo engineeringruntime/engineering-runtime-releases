@@ -39,6 +39,113 @@ Published **2026-10-01**. Read the [technical release notes](https://docs.engine
 Verify your archive with `SHA256SUMS.txt`. For release access, [contact the project](https://engineeringruntime.com/contact/).
 <!-- latest-release:end -->
 
+## Install
+
+The release repository is currently **private**. Use the authenticated steps
+below with [GitHub CLI](https://cli.github.com/) and an account that has access.
+Before upgrading from `runtime`, follow the [upgrade guide](https://docs.engineeringruntime.com/get-started/upgrading/)
+to update environment variables and preserve your earlier Runtime Home.
+
+### macOS / Linux
+
+This selects your native platform, verifies the archive checksum and installs
+`engrt` in `~/.local/bin`:
+
+```sh
+# Authenticate once, if needed.
+gh auth login
+
+# Install the pinned release (macOS / Linux, amd64 / arm64).
+set -eu
+VERSION=v0.10.0
+case "$(uname -s)" in Darwin) OS=darwin ;; Linux) OS=linux ;; *) echo 'Unsupported OS'; exit 1 ;; esac
+case "$(uname -m)" in arm64|aarch64) ARCH=arm64 ;; x86_64|amd64) ARCH=amd64 ;; *) echo 'Unsupported architecture'; exit 1 ;; esac
+ARCHIVE="engrt-$VERSION-$OS-$ARCH.tar.gz"
+ENGRT_INSTALL_WORK=$(mktemp -d)
+gh release download "$VERSION" -R engineeringruntime/engineering-runtime-releases \
+  --pattern "$ARCHIVE" --pattern SHA256SUMS.txt --dir "$ENGRT_INSTALL_WORK"
+(
+  cd "$ENGRT_INSTALL_WORK"
+  awk -v name="$ARCHIVE" '$2 == name { print; count++ } END { if (count != 1) exit 1 }' \
+    SHA256SUMS.txt > selected-checksum.txt
+  if command -v sha256sum >/dev/null 2>&1; then
+    sha256sum -c selected-checksum.txt
+  else
+    shasum -a 256 -c selected-checksum.txt
+  fi
+  tar -xzf "$ARCHIVE"
+  mkdir -p "$HOME/.local/bin"
+  install -m 0755 "engrt-$VERSION-$OS-$ARCH/engrt" "$HOME/.local/bin/engrt"
+)
+export PATH="$HOME/.local/bin:$PATH"
+engrt version
+```
+
+The expected version is `engrt 0.10.0`. Keep the PATH setting in your shell profile for future terminals. The earlier
+`runtime` executable is not removed, and no `runtime` alias is created.
+
+### PowerShell 7 / Windows
+
+Select `amd64` for x64 Windows or `arm64` for Windows on Arm. This downloads and
+verifies the published ZIP before installing `engrt.exe`:
+
+```powershell
+$ErrorActionPreference = 'Stop'
+# Authenticate once, if needed.
+gh auth login
+
+$version = 'v0.10.0'
+$arch = 'amd64' # Change to 'arm64' for Windows on Arm.
+$package = "engrt-$version-windows-$arch"
+$archive = "$package.zip"
+$work = Join-Path ([IO.Path]::GetTempPath()) ('engrt-install-' + [guid]::NewGuid().ToString('N'))
+New-Item -ItemType Directory -Path $work | Out-Null
+gh release download $version -R engineeringruntime/engineering-runtime-releases `
+  --pattern $archive --pattern SHA256SUMS.txt --dir $work
+if ($LASTEXITCODE -ne 0) { throw 'Release download failed' }
+$entries = @(Get-Content (Join-Path $work 'SHA256SUMS.txt') | Where-Object {
+  $_ -match ('^[0-9a-fA-F]{64} [ *]' + [regex]::Escape($archive) + '$')
+})
+if ($entries.Count -ne 1) { throw 'Missing or ambiguous checksum entry' }
+$zip = Join-Path $work $archive
+if ((Get-FileHash -Algorithm SHA256 $zip).Hash -ine $entries[0].Substring(0, 64)) {
+  throw 'Checksum mismatch'
+}
+Expand-Archive -LiteralPath $zip -DestinationPath (Join-Path $work 'extracted')
+$bin = Join-Path $HOME '.local\bin'
+New-Item -ItemType Directory -Force -Path $bin | Out-Null
+Copy-Item -LiteralPath (Join-Path $work "extracted/$package/engrt.exe") -Destination (Join-Path $bin 'engrt.exe')
+$env:PATH = "$bin;$env:PATH"
+engrt version
+if ($LASTEXITCODE -ne 0) { throw 'Installed executable did not run' }
+```
+
+The expected version is `engrt 0.10.0`. Add `%USERPROFILE%\.local\bin` to your **user PATH** for future terminals.
+Windows currently uses checksum-verified ZIP installation; there is no published
+`install.ps1` shortcut yet.
+
+### Public installation shortcuts — available after owner activation
+
+These are the short commands for when repository/artifact access becomes public.
+**They do not work anonymously while the repositories remain private.** Homebrew
+also requires the prepared v0.10.0 tap update and its installation checks to be
+activated; it is not enabled by making this README available.
+
+```sh
+# Homebrew (macOS / Linux) — after tap activation.
+brew install engineeringruntime/tap/engineering-runtime
+engrt version
+```
+
+```sh
+# Shell installer (macOS / Linux) — after public artifact access.
+curl -fsSL https://raw.githubusercontent.com/engineeringruntime/engineering-runtime-releases/main/install.sh | sh
+engrt version
+```
+
+Binary downloads, checksum verification, Windows PATH setup, migration and rollback
+are covered in the [Installation Guide](https://docs.engineeringruntime.com/get-started/installation/).
+
 ## Supported platforms
 
 v0.10.0 supports macOS, Linux and Windows on amd64 and arm64.
@@ -51,14 +158,6 @@ If you have trouble accessing the release or installation artifacts, please
 [Upgrade guidance](https://docs.engineeringruntime.com/get-started/upgrading/) ·
 [Community](https://github.com/orgs/engineeringruntime/discussions) ·
 [Report an Issue](https://github.com/engineeringruntime/engineering-runtime-releases/issues)
-
-### Homebrew (macOS and Linux) — deferred
-
-The v0.10.0 formula is prepared from the published checksums in tap PR #4, but
-its activation and four-platform install verification are deferred until the
-owner enables the distribution path. Use authorized manual installation for now.
-A GitHub CLI login does not authenticate Homebrew's archive downloads. Windows
-uses manual ZIP installation and is outside the formula.
 
 ## Distribution access and source
 
