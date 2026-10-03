@@ -4,13 +4,13 @@ param(
     [Parameter(Mandatory)][string]$PublishedDirectory,
     # The published release under test; it must be the current Latest because the
     # Latest-selection case below installs Latest and compares it with this row.
-    [Parameter(Mandatory)][ValidatePattern('^v[0-9]+\.[0-9]+\.[0-9]+$')][string]$Version
+    [Parameter(Mandatory)][ValidatePattern('^v[0-9]+\.[0-9]+\.[0-9]+$')][string]$ReleaseVersion
 )
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 . (Join-Path $PSScriptRoot '../install.ps1')
 $arch = if ([Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString() -eq 'Arm64') { 'arm64' } else { 'amd64' }
-$version = $Version
+$version = $ReleaseVersion
 $package = "engrt-$version-windows-$arch"
 $archiveName = "$package.zip"
 $root = Join-Path ([IO.Path]::GetTempPath()) ('engrt-installer-tests-' + [guid]::NewGuid().ToString('N'))

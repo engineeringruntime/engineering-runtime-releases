@@ -41,7 +41,7 @@ jobs:
         shell: pwsh
         env:
           ENGRT_INSTALL_REPORT: ${{ runner.temp }}/windows-installer-result.json
-        run: ./scripts/test-install.ps1 -PublishedDirectory (Join-Path $env:RUNNER_TEMP 'published-installer-input') -Version $env:ENGRT_FIXTURE_VERSION
+        run: ./scripts/test-install.ps1 -PublishedDirectory (Join-Path $env:RUNNER_TEMP 'published-installer-input') -ReleaseVersion $env:ENGRT_FIXTURE_VERSION
       - name: Retain native installer result
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
