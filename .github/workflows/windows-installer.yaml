@@ -30,13 +30,18 @@ jobs:
           $ErrorActionPreference = 'Stop'
           $dir = Join-Path $env:RUNNER_TEMP 'published-installer-input'
           New-Item -ItemType Directory -Path $dir | Out-Null
-          gh release download v0.10.0 -R engineeringruntime/engineering-runtime-releases --pattern 'engrt-v0.10.0-windows-${{ matrix.arch }}.zip' --pattern SHA256SUMS.txt --pattern PROVENANCE.json --dir $dir
+          # Test the current Latest release: the installer's Latest selection must
+          # install exactly these bytes. A pinned tag goes stale at the next release.
+          $tag = gh api repos/engineeringruntime/engineering-runtime-releases/releases/latest --jq .tag_name
+          if ($LASTEXITCODE -ne 0 -or $tag -notmatch '^v[0-9]+\.[0-9]+\.[0-9]+$') { throw "Latest release lookup failed: $tag" }
+          gh release download $tag -R engineeringruntime/engineering-runtime-releases --pattern "engrt-$tag-windows-${{ matrix.arch }}.zip" --pattern SHA256SUMS.txt --pattern PROVENANCE.json --dir $dir
           if ($LASTEXITCODE -ne 0) { throw 'Published fixture download failed' }
+          "ENGRT_FIXTURE_VERSION=$tag" >> $env:GITHUB_ENV
       - name: Execute native installer and refusal fixtures
         shell: pwsh
         env:
           ENGRT_INSTALL_REPORT: ${{ runner.temp }}/windows-installer-result.json
-        run: ./scripts/test-install.ps1 -PublishedDirectory (Join-Path $env:RUNNER_TEMP 'published-installer-input')
+        run: ./scripts/test-install.ps1 -PublishedDirectory (Join-Path $env:RUNNER_TEMP 'published-installer-input') -ReleaseVersion $env:ENGRT_FIXTURE_VERSION
       - name: Retain native installer result
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
