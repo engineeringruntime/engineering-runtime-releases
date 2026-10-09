@@ -1,0 +1,14 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'root=\"${CLAUDE_PROJECT_DIR:-.}\"; if [ -f \"$root/AGENTS.md\" ] && [ -f \"$root/CLAUDE.md\" ]; then echo \"Read this repository AGENTS.md and CLAUDE.md and owning hub/Workspace rules before edits; preserve release and evidence gates.\"; else echo \"Missing required agent instructions.\" >&2; exit 2; fi'"
+          }
+        ]
+      }
+    ]
+  }
+}
