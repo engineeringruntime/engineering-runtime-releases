@@ -21,20 +21,20 @@ use `Get-Command engrt -All` to verify PATH. No binaries or checksums are commit
 in the repository; they remain GitHub Release assets.
 
 <!-- latest-release:start -->
-## Latest release — v0.11.0
+## Latest release — v0.12.0
 
-Published **2026-10-03**. Read the [technical release notes](https://docs.engineeringruntime.com/release-notes/).
+Published **2026-10-15**. Read the [technical release notes](https://docs.engineeringruntime.com/release-notes/).
 
-**What changed:** One contract: a capability can execute, return a deterministic structured result, verify actual provider state, and record safe evidence.
+**What changed:** Governed authority: separate ENGRT sessions, explicit sources and honest identity evidence.
 
 | Platform | Architecture | Archive |
 |---|---|---|
-| Linux | amd64 | `engrt-v0.11.0-linux-amd64.tar.gz` |
-| Linux | arm64 | `engrt-v0.11.0-linux-arm64.tar.gz` |
-| macOS | amd64 | `engrt-v0.11.0-darwin-amd64.tar.gz` |
-| macOS | arm64 | `engrt-v0.11.0-darwin-arm64.tar.gz` |
-| Windows | amd64 | `engrt-v0.11.0-windows-amd64.zip` |
-| Windows | arm64 | `engrt-v0.11.0-windows-arm64.zip` |
+| Linux | amd64 | `engrt-v0.12.0-linux-amd64.tar.gz` |
+| Linux | arm64 | `engrt-v0.12.0-linux-arm64.tar.gz` |
+| macOS | amd64 | `engrt-v0.12.0-darwin-amd64.tar.gz` |
+| macOS | arm64 | `engrt-v0.12.0-darwin-arm64.tar.gz` |
+| Windows | amd64 | `engrt-v0.12.0-windows-amd64.zip` |
+| Windows | arm64 | `engrt-v0.12.0-windows-arm64.zip` |
 
 Verify your archive with `SHA256SUMS.txt`. For release access, [contact the project](https://engineeringruntime.com/contact/).
 <!-- latest-release:end -->
