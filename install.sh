@@ -9,10 +9,9 @@
 # a public artifact is not open source.
 #
 # v0.10.0 and later use engrt archives and install only engrt; no runtime alias.
-# Keep this candidate installer unpublished until the matching release is approved.
 #
 # Environment:
-#   VERSION=v0.10.0      install a specific tag instead of the latest
+#   VERSION=vX.Y.Z      install a specific release tag instead of the latest
 #   INSTALL_DIR=/path   install here instead of the default search
 #
 # Exit codes are deliberately distinct, because an automated caller branches on
