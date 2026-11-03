@@ -1,0 +1,71 @@
+name: Publish public demo catalog
+on:
+  release:
+    types: [published, edited]
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/publish-demo-catalog.yml
+      - scripts/generate-demo-catalog.py
+      - scripts/publish-demo-catalog.py
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: public-demo-catalog
+  cancel-in-progress: false
+jobs:
+  generate:
+    if: github.event_name != 'release' || (!github.event.release.draft && !github.event.release.prerelease)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: main
+          persist-credentials: false
+      - name: Resolve actual stable Latest and download its published bytes
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh api repos/engineeringruntime/engineering-runtime-releases/releases/latest > "$RUNNER_TEMP/release.json"
+          tag=$(python3 -c 'import json,re,sys; r=json.load(open(sys.argv[1])); assert not r["draft"] and not r["prerelease"] and re.fullmatch(r"v\d+\.\d+\.\d+",r["tag_name"]); print(r["tag_name"])' "$RUNNER_TEMP/release.json")
+          echo "CATALOG_TAG=$tag" >> "$GITHUB_ENV"
+          mkdir -p "$RUNNER_TEMP/demo-input"
+          # Release events can arrive before the publisher finishes uploading assets.
+          for attempt in 1 2 3 4; do
+            if gh release download "$tag" -R engineeringruntime/engineering-runtime-releases --pattern "engrt-$tag-linux-amd64.tar.gz" --pattern SHA256SUMS.txt --dir "$RUNNER_TEMP/demo-input" --clobber; then break; fi
+            if [ "$attempt" = 4 ]; then exit 1; fi
+            sleep 15
+          done
+      - name: Extract defaults and provider metadata in an isolated Home
+        run: |
+          python3 scripts/generate-demo-catalog.py \
+            --archive "$RUNNER_TEMP/demo-input/engrt-$CATALOG_TAG-linux-amd64.tar.gz" \
+            --checksums "$RUNNER_TEMP/demo-input/SHA256SUMS.txt" \
+            --tag "$CATALOG_TAG" --output "$RUNNER_TEMP/demo-output/latest.json"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: public-demo-catalog
+          path: ${{ runner.temp }}/demo-output/latest.json
+          if-no-files-found: error
+  publish:
+    needs: generate
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: main
+          persist-credentials: false
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: public-demo-catalog
+          path: ${{ runner.temp }}/demo-output
+      - name: Publish data only after rechecking Latest
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/publish-demo-catalog.py "$RUNNER_TEMP/demo-output/latest.json"
