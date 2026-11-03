@@ -294,3 +294,32 @@ x64 and Arm64. Fixtures contain the published native ZIP, SHA256SUMS.txt and
 PROVENANCE.json; the workflow tests real installation, reinstall, Latest, script
 entry, authenticated download and refusals that preserve an existing install.
 These installer checks supplement, rather than replace, frozen binary evidence.
+
+
+## Public demo metadata publication (founder-authorized 2026-11-03)
+
+The public demo consumes derived metadata, not binaries. The bounded exception to
+the artifact-storage rule is `demo/latest.json` on the dedicated `demo-data`
+branch: released provider names/counts and exact compiled config/policy defaults,
+with version and archive/document hashes. No binary, archive, private source,
+operator configuration, credential or raw execution evidence is committed there.
+
+`.github/workflows/publish-demo-catalog.yml` runs after stable release publication
+(and edits), after generator changes on main (initial backfill), or manual dispatch.
+It resolves actual stable Latest, verifies the selected published Linux archive
+before executing local config-init calls in an isolated Home, then publishes from
+a separate write job. It rechecks Latest before writing and never modifies release
+assets, tags, notes, README Latest blocks or promotion state. It uses the repository
+GITHUB_TOKEN, not a new cross-repository credential.
+
+This is automatic propagation of an already authorized stable release's public
+defaults, not authority to publish a Runtime release. An unsupported binary/catalog
+contract or failed extraction leaves the previous feed intact. Rerun the workflow
+after resolving the failure; the demo marks a stale/missing feed as saved defaults.
+The existing source publisher uses RELEASES_REPO_TOKEN for cross-repository release
+publication, so release events can trigger this repository's workflow. If publisher
+authentication changes, verify event delivery; GITHUB_TOKEN-created events normally
+do not trigger additional workflows.
+
+Run `python3 scripts/test-demo-catalog.py` for extraction/refusal tests. After
+activation verify the feed against actual stable Latest and the rendered demo.
