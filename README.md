@@ -40,7 +40,9 @@ brew install engineeringruntime/tap/engineering-runtime
 engrt version
 ```
 
-Upgrade with `brew update && brew upgrade engineering-runtime`.
+Upgrade with `brew update && brew upgrade engineeringruntime/tap/engineering-runtime`. Use the full name: Homebrew 7
+refuses a short name from a third-party tap until it is trusted, and naming the
+formula in full trusts it.
 
 ### Install script (macOS and Linux)
 
