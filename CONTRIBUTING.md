@@ -23,7 +23,7 @@ private, so the way to change Runtime's behaviour is an issue here.
 | A capability fails or is wrong, or you want a new one | [engineering-runtime-capabilities issues](https://github.com/engineeringruntime/engineering-runtime-capabilities/issues/new/choose) |
 | A question | [Discussions → Q&A](https://github.com/orgs/engineeringruntime/discussions/categories/q-a) |
 | An idea that is not concrete yet | [Discussions → Ideas](https://github.com/orgs/engineeringruntime/discussions/categories/ideas) |
-| A security vulnerability | privately, through the [contact page](https://engineeringruntime.com/contact/). Never in a public issue |
+| A security vulnerability | privately: [Report a vulnerability](https://github.com/engineeringruntime/engineering-runtime-releases/security/advisories/new) on the Security tab, or email support@engineeringruntime.com. See [SECURITY.md](SECURITY.md). Never in a public issue |
 
 Not sure whether it is a capability or `engrt`? Run the same operation
 directly (for example `engrt github api GET …`). If it fails there too, report
