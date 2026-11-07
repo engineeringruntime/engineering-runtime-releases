@@ -1,24 +1,9 @@
 # Engineering Runtime Releases
 
-Engineering Runtime is a single binary for governed engineering operations.
-See [Install Runtime](https://docs.engineeringruntime.com/get-started/installation/)
-for archive selection, checksum verification and installation.
-
-## v0.10.0 distribution
-
-v0.10.0 is published through restricted release access. Its archives are
-`engrt-v0.10.0-<os>-<arch>`: macOS/Linux use `.tar.gz`; Windows amd64/arm64
-use `.zip`. Each contains a versioned directory with `engrt` or `engrt.exe`.
-All six published archives match their successful native qualification bytes.
-
-The shell installer installs only `engrt` on macOS/Linux, retaining an existing
-`runtime` executable without creating an alias. It requires anonymous artifact
-access, which is not enabled for this private release. Authorized operators can
-obtain archives with `gh release download v0.10.0 -R engineeringruntime/engineering-runtime-releases`
-and follow the checksum-verified [manual installation guide](https://docs.engineeringruntime.com/get-started/installation/).
-Windows supports the checksum-verified `install.ps1` installer and manual ZIP installation;
-use `Get-Command engrt -All` to verify PATH. No binaries or checksums are committed
-in the repository; they remain GitHub Release assets.
+Engineering Runtime is a single binary, `engrt`, for governed engineering
+operations. This repository is where its releases are published: archives for
+macOS, Linux and Windows on `amd64` and `arm64`, each with `SHA256SUMS.txt`.
+Downloads are public and need no GitHub account.
 
 <!-- latest-release:start -->
 ## Latest release — v0.13.0
@@ -41,139 +26,126 @@ Verify your archive with `SHA256SUMS.txt`. For release access, [contact the proj
 
 ## Install
 
-The release repository is currently **private**. Use the authenticated steps
-below with [GitHub CLI](https://cli.github.com/) and an account that has access.
-Before upgrading from `runtime`, follow the [upgrade guide](https://docs.engineeringruntime.com/get-started/upgrading/)
-to update environment variables and preserve your earlier Runtime Home.
+Pick one way. Each one verifies the archive against the release's
+`SHA256SUMS.txt` before installing, and installs only `engrt`.
 
-### macOS / Linux
+### Homebrew (macOS and Linux)
 
-This selects your native platform, verifies the archive checksum and installs
-`engrt` in `~/.local/bin`:
-
-```sh
-# Authenticate once, if needed.
-gh auth login
-
-# Install the pinned release (macOS / Linux, amd64 / arm64).
-set -eu
-VERSION=v0.10.0
-case "$(uname -s)" in Darwin) OS=darwin ;; Linux) OS=linux ;; *) echo 'Unsupported OS'; exit 1 ;; esac
-case "$(uname -m)" in arm64|aarch64) ARCH=arm64 ;; x86_64|amd64) ARCH=amd64 ;; *) echo 'Unsupported architecture'; exit 1 ;; esac
-ARCHIVE="engrt-$VERSION-$OS-$ARCH.tar.gz"
-ENGRT_INSTALL_WORK=$(mktemp -d)
-gh release download "$VERSION" -R engineeringruntime/engineering-runtime-releases \
-  --pattern "$ARCHIVE" --pattern SHA256SUMS.txt --dir "$ENGRT_INSTALL_WORK"
-(
-  cd "$ENGRT_INSTALL_WORK"
-  awk -v name="$ARCHIVE" '$2 == name { print; count++ } END { if (count != 1) exit 1 }' \
-    SHA256SUMS.txt > selected-checksum.txt
-  if command -v sha256sum >/dev/null 2>&1; then
-    sha256sum -c selected-checksum.txt
-  else
-    shasum -a 256 -c selected-checksum.txt
-  fi
-  tar -xzf "$ARCHIVE"
-  mkdir -p "$HOME/.local/bin"
-  install -m 0755 "engrt-$VERSION-$OS-$ARCH/engrt" "$HOME/.local/bin/engrt"
-)
-export PATH="$HOME/.local/bin:$PATH"
-engrt version
-```
-
-The expected version is `engrt 0.10.0`. Keep the PATH setting in your shell profile for future terminals. The earlier
-`runtime` executable is not removed, and no `runtime` alias is created.
-
-### PowerShell 7 / Windows
-
-The installer selects x64 or Arm64 automatically, verifies the ZIP checksum and
-executable version, and installs only `engrt.exe` in `~/.local/bin`.
-It requires PowerShell 7 or later:
-
-```powershell
-$ErrorActionPreference = 'Stop'
-# Authenticate once with an account that has release access.
-gh auth login
-if ($LASTEXITCODE -ne 0) { throw 'GitHub authentication failed' }
-gh api repos/engineeringruntime/engineering-runtime-releases/contents/install.ps1 `
-  -H 'Accept: application/vnd.github.raw+json' > install.ps1
-if ($LASTEXITCODE -ne 0) { throw 'Installer download failed' }
-./install.ps1 -Version v0.10.0 -GitHubCLI
-$env:PATH = "$HOME\.local\bin;$env:PATH"
-engrt version
-```
-
-The expected version is `engrt 0.10.0`. Add `%USERPROFILE%\.local\bin` to your
-**user PATH** for future terminals. The script does not edit persistent PATH,
-migrate Runtime Home, or remove an earlier `runtime.exe`.
-
-Omit `-Version` to select Latest. Use `-InstallDirectory C:\Tools\engrt` for a
-custom destination. `VERSION` and `INSTALL_DIR` environment variables are also
-supported. For an offline install, supply `-Version v0.10.0 -ArchiveDirectory`
-pointing to a folder containing the native ZIP and `SHA256SUMS.txt`.
-Stable v0.10.0 and later are supported; older releases use separate manual
-installation. Private downloads require `-GitHubCLI`; public downloads are the
-default. The version probe uses a disposable Home before replacing the executable.
-
-### Public installation shortcuts — available after owner activation
-
-These are the short commands for when repository/artifact access becomes public.
-**They do not work anonymously while the repositories remain private.** Homebrew
-also requires the prepared v0.10.0 tap update and its installation checks to be
-activated; it is not enabled by making this README available.
-
-```sh
-# Homebrew (macOS / Linux) — after tap activation.
+```bash
 brew install engineeringruntime/tap/engineering-runtime
 engrt version
 ```
 
-```sh
-# Shell installer (macOS / Linux) — after public artifact access.
+Upgrade with `brew update && brew upgrade engineering-runtime`.
+
+### Install script (macOS and Linux)
+
+```bash
 curl -fsSL https://raw.githubusercontent.com/engineeringruntime/engineering-runtime-releases/main/install.sh | sh
 engrt version
 ```
 
+The script detects your OS and architecture, downloads the archive and
+`SHA256SUMS.txt` from the latest release, stops without installing anything if
+the checksum does not match, and installs `engrt` in `/usr/local/bin` when that
+is writable, otherwise in `~/.local/bin`. It needs `curl`, `tar` and `shasum`
+or `sha256sum`.
+
+- `VERSION=v0.13.0` installs a specific release (v0.10.0 or later).
+- `INSTALL_DIR=/path` installs into that directory.
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/engineeringruntime/engineering-runtime-releases/main/install.sh \
+  | VERSION=v0.13.0 INSTALL_DIR="$HOME/.local/bin" sh
+```
+
+If it prints `NOTE: … is not on your PATH`, add that directory to your shell
+profile and open a new terminal:
+
+```bash
+export PATH="$HOME/.local/bin:$PATH"
+```
+
+### By hand (macOS and Linux)
+
+Run this in an empty directory. It detects your OS and architecture:
+
+```bash
+VERSION=v0.13.0
+OS=$(uname -s | tr '[:upper:]' '[:lower:]')                        # darwin or linux
+ARCH=$(uname -m | sed -e 's/x86_64/amd64/' -e 's/aarch64/arm64/')  # amd64 or arm64
+NAME=engrt-$VERSION-$OS-$ARCH
+BASE=https://github.com/engineeringruntime/engineering-runtime-releases/releases/download/$VERSION
+
+curl -fsSLO "$BASE/$NAME.tar.gz"
+curl -fsSLO "$BASE/SHA256SUMS.txt"
+grep "$NAME.tar.gz" SHA256SUMS.txt | shasum -a 256 -c -     # Linux without shasum: sha256sum -c -
+tar -xzf "$NAME.tar.gz"
+mkdir -p ~/.local/bin && install -m 0755 "$NAME/engrt" ~/.local/bin/engrt
+export PATH="$HOME/.local/bin:$PATH"                         # add this line to ~/.zshrc or ~/.bashrc
+engrt version
+```
+
+The checksum line must print `engrt-v0.13.0-<os>-<arch>.tar.gz: OK`. If it
+prints `FAILED`, stop and download again: the archive is not the published one.
+
+### Windows (PowerShell 7, x64 or Arm64)
+
 ```powershell
-# PowerShell 7 (Windows) — after public artifact access.
-irm https://raw.githubusercontent.com/engineeringruntime/engineering-runtime-releases/main/install.ps1 | iex
+Invoke-RestMethod https://raw.githubusercontent.com/engineeringruntime/engineering-runtime-releases/main/install.ps1 -OutFile install.ps1
+./install.ps1
 $env:PATH = "$HOME\.local\bin;$env:PATH"
 engrt version
 ```
 
-Binary downloads, checksum verification, Windows PATH setup, migration and rollback
-are covered in the [Installation Guide](https://docs.engineeringruntime.com/get-started/installation/).
+The script selects x64 or Arm64, verifies the ZIP checksum and the executable's
+version, and installs only `engrt.exe` in `%USERPROFILE%\.local\bin`. Add that
+directory to your **user PATH** for new terminals; the script does not change
+it. Options: `-Version v0.13.0`, `-InstallDirectory C:\Tools\engrt`, and for
+an offline install `-Version <tag> -ArchiveDirectory <folder>` with the ZIP and
+`SHA256SUMS.txt` in that folder.
+
+By hand: download `engrt-<version>-windows-<amd64|arm64>.zip` and
+`SHA256SUMS.txt` from the release, check that `Get-FileHash <zip>` matches the
+ZIP's line, extract it and put `engrt.exe` on your `PATH`.
+
+## Next: run your first capability
+
+Installing gives you the binary; capabilities are what it runs.
+[engineering-runtime-capabilities](https://github.com/engineeringruntime/engineering-runtime-capabilities#quick-start-from-install-to-your-first-run)
+takes you from here to a first run in a few minutes: `git` and `gh`, a sample
+`config.yaml` and `policy.yaml`, GitHub authority, and running a read-only
+capability with `validate`, `plan` and `execute`.
+
+Runtime creates its home (`~/.engrt`) on the first command you run. It does
+not create a policy for you: until you supply one, the safety profile compiled
+into the binary governs.
 
 ## Supported platforms
 
-v0.10.0 supports macOS, Linux and Windows on amd64 and arm64.
-v0.9.9 retains its historical macOS/Linux-only support scope.
+From v0.10.0: macOS, Linux and Windows, each on `amd64` and `arm64`. The
+installers support v0.10.0 and later only.
 
-Verify the SHA-256 checksum for the exact archive before installation.
-If you have trouble accessing the release or installation artifacts, please
-[contact the Engineering Runtime project](https://engineeringruntime.com/contact/).
+Releases before v0.10.0 ship a `runtime` binary in `engineering-runtime-*`
+archives. The installers refuse them and change nothing; install an older
+release by hand, in a separate directory and Runtime Home. Upgrading from
+`runtime` to `engrt`: follow the
+[upgrade guide](https://docs.engineeringruntime.com/get-started/upgrading/) to
+update environment variables and keep your earlier Runtime Home. The installers
+neither remove `runtime` nor create a `runtime` alias.
 
-[Upgrade guidance](https://docs.engineeringruntime.com/get-started/upgrading/) ·
+## Help
+
+[Installation guide](https://docs.engineeringruntime.com/get-started/installation/) ·
+[Release notes](https://docs.engineeringruntime.com/release-notes/) ·
 [Community](https://github.com/orgs/engineeringruntime/discussions) ·
-[Report an Issue](https://github.com/engineeringruntime/engineering-runtime-releases/issues)
+[Report an issue](https://github.com/engineeringruntime/engineering-runtime-releases/issues) ·
+[Contact](https://engineeringruntime.com/contact/)
 
-## Distribution access and source
+## Licence and source
 
-This release repository remains private. Authenticated operator/CI downloads
-have been verified; anonymous installation, Homebrew activation and public
-launch are separate owner decisions. Repository visibility does not change as
-a side effect of publishing a new version. For access, [contact the project](https://engineeringruntime.com/contact/).
-
-Engineering Runtime itself is **proprietary software**. Its source code is
-maintained separately and remains **private**.
-
-Making compiled artifacts available does **not** make Engineering Runtime open source.
-
-Use of the Engineering Runtime binaries is subject to the terms in
-[`LICENSE`](./LICENSE).
-
-The v0.10.0 shell installer supports only v0.10.0 and later. A pre-0.10.0
-`VERSION` pin exits 1 with explicit rollback guidance before asset downloads or
-destination writes. Older releases retain `engineering-runtime-*` archives and
-`runtime`; use their checksum-verified manual installation in a separate
-destination and Home. No automatic downgrade or migration is performed.
+Engineering Runtime is **proprietary software**. Its source code is maintained
+separately and is private; publishing compiled releases does **not** make it
+open source. Use of the binaries is subject to the terms in
+[`LICENSE`](./LICENSE). No binaries or checksums are committed to this
+repository; they are GitHub Release assets.
