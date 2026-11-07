@@ -140,8 +140,10 @@ Report a problem with `engrt` in [this repository's issues](https://github.com/e
 and a problem with a capability in
 [engineering-runtime-capabilities](https://github.com/engineeringruntime/engineering-runtime-capabilities/issues/new/choose).
 Ask questions in [Discussions → Q&A](https://github.com/orgs/engineeringruntime/discussions/categories/q-a) and share ideas in
-[Discussions → Ideas](https://github.com/orgs/engineeringruntime/discussions/categories/ideas). Report security vulnerabilities privately by email to
-support@engineeringruntime.com, never in a public issue; see [SECURITY.md](SECURITY.md).
+[Discussions → Ideas](https://github.com/orgs/engineeringruntime/discussions/categories/ideas). Report security vulnerabilities privately with
+[Report a vulnerability](https://github.com/engineeringruntime/engineering-runtime-releases/security/advisories/new)
+or by email to support@engineeringruntime.com, never in a public issue; see
+[SECURITY.md](SECURITY.md).
 See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 [Installation guide](https://docs.engineeringruntime.com/get-started/installation/) ·
