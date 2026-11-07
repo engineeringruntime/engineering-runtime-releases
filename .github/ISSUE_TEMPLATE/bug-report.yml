@@ -1,0 +1,97 @@
+name: Bug report
+description: engrt installs, runs or behaves incorrectly.
+title: "[bug] <area>: <what goes wrong>"
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        For a problem with a capability file, use the
+        [capabilities repository](https://github.com/engineeringruntime/engineering-runtime-capabilities/issues/new/choose).
+        Not sure which? Run the same operation directly (for example `engrt github api GET …`):
+        if it fails there too, report it here.
+
+        **Remove tokens, private repository names, hostnames and personal data from everything you paste.**
+  - type: input
+    id: version
+    attributes:
+      label: engrt version
+      description: Output of `engrt version`. For an install problem, the version you tried to install.
+      placeholder: engrt 0.13.0
+    validations:
+      required: true
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      options:
+        - macOS (Apple silicon)
+        - macOS (Intel)
+        - Linux (amd64)
+        - Linux (arm64)
+        - Windows (x64)
+        - Windows (Arm64)
+        - CI runner or container (say which below)
+    validations:
+      required: true
+  - type: dropdown
+    id: install
+    attributes:
+      label: How it was installed
+      options:
+        - Homebrew
+        - install.sh
+        - install.ps1
+        - by hand from a release archive
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Install or upgrade
+        - Authentication (engrt auth …)
+        - Configuration or policy (engrt config …, a policy denial)
+        - A provider operation (engrt github …, engrt files …)
+        - Command engine (engrt command run …)
+        - Capability engine (validate, plan, execute behave wrongly for a valid file)
+        - Audit and evidence (engrt audit …)
+        - MCP (engrt mcp …)
+        - Output, errors or help text
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: command
+    attributes:
+      label: Command you ran
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: What happened
+      description: The output. `--output json` (before the provider name) gives the refusal or error code.
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: textarea
+    id: setup
+    attributes:
+      label: Relevant setup
+      description: The relevant parts of your config and policy, and `engrt config validate` output. Never paste credential values.
+  - type: checkboxes
+    id: redacted
+    attributes:
+      label: Before you submit
+      options:
+        - label: I removed tokens, credentials and private data from this issue.
+          required: true

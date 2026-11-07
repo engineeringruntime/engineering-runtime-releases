@@ -1,0 +1,35 @@
+name: Feature request
+description: Something engrt should do that it does not today.
+title: "[feature] <what you want to do>"
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        For a new or changed capability, use the
+        [capabilities repository](https://github.com/engineeringruntime/engineering-runtime-capabilities/issues/new/choose).
+        Use this for Runtime itself: a provider, an operation, authentication, policy, audit, CLI or MCP behaviour.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What you are trying to do
+      description: The engineering task and who runs it (a person, CI, an AI assistant).
+    validations:
+      required: true
+  - type: textarea
+    id: today
+    attributes:
+      label: How you do it today
+      description: The script, CLI or other tool you use instead, and what is missing.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What would help
+      description: The behaviour you would like. If it changes anything, say what must stop it before it writes.
+  - type: input
+    id: version
+    attributes:
+      label: engrt version
+      placeholder: engrt 0.13.0
