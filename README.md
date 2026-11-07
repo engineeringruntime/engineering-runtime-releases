@@ -57,12 +57,12 @@ the checksum does not match, and installs `engrt` in `/usr/local/bin` when that
 is writable, otherwise in `~/.local/bin`. It needs `curl`, `tar` and `shasum`
 or `sha256sum`.
 
-- `VERSION=v0.13.0` installs a specific release (v0.10.0 or later).
+- Set `VERSION` to an explicit tag from [published releases](https://github.com/engineeringruntime/engineering-runtime-releases/releases) when you need a reproducible, pinned install (v0.10.0 or later). Omit it for the latest published release.
 - `INSTALL_DIR=/path` installs into that directory.
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/engineeringruntime/engineering-runtime-releases/main/install.sh \
-  | VERSION=v0.13.0 INSTALL_DIR="$HOME/.local/bin" sh
+  | INSTALL_DIR="$HOME/.local/bin" sh
 ```
 
 If it prints `NOTE: … is not on your PATH`, add that directory to your shell
@@ -74,10 +74,13 @@ export PATH="$HOME/.local/bin:$PATH"
 
 ### By hand (macOS and Linux)
 
-Run this in an empty directory. It detects your OS and architecture:
+Run this in an empty directory. Select the exact published tag from the
+[releases page](https://github.com/engineeringruntime/engineering-runtime-releases/releases/latest)
+first: manual installs intentionally pin a version so the archive and checksum
+refer to the same release. The commands detect your OS and architecture:
 
 ```bash
-VERSION=v0.13.0
+VERSION=vX.Y.Z                  # replace with an actual published tag
 OS=$(uname -s | tr '[:upper:]' '[:lower:]')                        # darwin or linux
 ARCH=$(uname -m | sed -e 's/x86_64/amd64/' -e 's/aarch64/arm64/')  # amd64 or arm64
 NAME=engrt-$VERSION-$OS-$ARCH
@@ -92,7 +95,7 @@ export PATH="$HOME/.local/bin:$PATH"                         # add this line to 
 engrt version
 ```
 
-The checksum line must print `engrt-v0.13.0-<os>-<arch>.tar.gz: OK`. If it
+The checksum line must print `$NAME.tar.gz: OK` for your selected release. If it
 prints `FAILED`, stop and download again: the archive is not the published one.
 
 ### Windows (PowerShell 7, x64 or Arm64)
@@ -107,7 +110,7 @@ engrt version
 The script selects x64 or Arm64, verifies the ZIP checksum and the executable's
 version, and installs only `engrt.exe` in `%USERPROFILE%\.local\bin`. Add that
 directory to your **user PATH** for new terminals; the script does not change
-it. Options: `-Version v0.13.0`, `-InstallDirectory C:\Tools\engrt`, and for
+it. Options: `-Version <published-tag>`, `-InstallDirectory C:\Tools\engrt`, and for
 an offline install `-Version <tag> -ArchiveDirectory <folder>` with the ZIP and
 `SHA256SUMS.txt` in that folder.
 
