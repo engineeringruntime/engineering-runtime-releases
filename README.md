@@ -1,5 +1,9 @@
 # Engineering Runtime Releases
 
+[![Latest release](https://img.shields.io/github/v/release/engineeringruntime/engineering-runtime-releases?label=engrt)](https://github.com/engineeringruntime/engineering-runtime-releases/releases/latest)
+[![Platforms](https://img.shields.io/badge/platforms-macOS%20%7C%20Linux%20%7C%20Windows-blue)](#install)
+[![Windows installer](https://github.com/engineeringruntime/engineering-runtime-releases/actions/workflows/windows-installer.yaml/badge.svg?branch=main)](https://github.com/engineeringruntime/engineering-runtime-releases/actions/workflows/windows-installer.yaml)
+
 Engineering Runtime is a single binary, `engrt`, for governed engineering
 operations. This repository is where its releases are published: archives for
 macOS, Linux and Windows on `amd64` and `arm64`, each with `SHA256SUMS.txt`.
@@ -36,7 +40,9 @@ brew install engineeringruntime/tap/engineering-runtime
 engrt version
 ```
 
-Upgrade with `brew update && brew upgrade engineering-runtime`.
+Upgrade with `brew update && brew upgrade engineeringruntime/tap/engineering-runtime`. Use the full name: Homebrew 7
+refuses a short name from a third-party tap until it is trusted, and naming the
+formula in full trusts it.
 
 ### Install script (macOS and Linux)
 

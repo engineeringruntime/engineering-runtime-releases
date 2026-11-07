@@ -38,7 +38,7 @@ While you investigate:
 ## Supported versions
 
 Security fixes go into the **latest release** only. Upgrade with
-`brew update && brew upgrade engineering-runtime`, or re-run the installer from
+`brew update && brew upgrade engineeringruntime/tap/engineering-runtime`, or re-run the installer from
 the [README](README.md#install).
 
 ## Scope
