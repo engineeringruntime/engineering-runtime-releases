@@ -139,8 +139,10 @@ neither remove `runtime` nor create a `runtime` alias.
 Report a problem with `engrt` in [this repository's issues](https://github.com/engineeringruntime/engineering-runtime-releases/issues/new/choose),
 and a problem with a capability in
 [engineering-runtime-capabilities](https://github.com/engineeringruntime/engineering-runtime-capabilities/issues/new/choose).
-Security vulnerabilities go privately through the [contact page](https://engineeringruntime.com/contact/),
-never a public issue. See [CONTRIBUTING.md](CONTRIBUTING.md).
+Ask questions in [Discussions → Q&A](https://github.com/orgs/engineeringruntime/discussions/categories/q-a) and share ideas in
+[Discussions → Ideas](https://github.com/orgs/engineeringruntime/discussions/categories/ideas). Security vulnerabilities go privately through the
+[contact page](https://engineeringruntime.com/contact/), never a public issue.
+See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 [Installation guide](https://docs.engineeringruntime.com/get-started/installation/) ·
 [Release notes](https://docs.engineeringruntime.com/release-notes/) ·
