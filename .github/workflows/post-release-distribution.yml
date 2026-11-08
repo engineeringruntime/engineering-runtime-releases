@@ -18,6 +18,8 @@ on:
       - .github/workflows/post-release-distribution.yml
       - scripts/verify-distribution-release.py
       - scripts/test-verify-distribution-release.py
+      - scripts/audit-public-version-references.py
+      - scripts/test-audit-public-version-references.py
 
 permissions:
   contents: read
@@ -36,6 +38,8 @@ jobs:
           persist-credentials: false
       - name: Offline publication inventory tests
         run: python3 scripts/test-verify-distribution-release.py
+      - name: Offline public-reference hygiene tests
+        run: python3 scripts/test-audit-public-version-references.py
 
   homebrew-handoff:
     name: Verify public inventory and dispatch Homebrew
@@ -115,3 +119,44 @@ jobs:
             echo "This reports dispatch acceptance, **not** a qualified Homebrew install or passing downstream CI."
             echo "Verify the [Homebrew updater and CI runs](https://github.com/engineeringruntime/homebrew-tap/actions) before release closure."
           } >> "$GITHUB_STEP_SUMMARY"
+
+  public-reference-hygiene:
+    name: Audit leftover public release labels (advisory)
+    needs: offline-gate
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'release' &&
+       !github.event.release.draft &&
+       !github.event.release.prerelease)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Fetch current public source references
+        env:
+          REQUESTED_VERSION: ${{ github.event_name == 'workflow_dispatch' && inputs.version || github.event.release.tag_name }}
+        run: |
+          set -euo pipefail
+          current=$(curl -fsSL https://api.github.com/repos/engineeringruntime/engineering-runtime-releases/releases/latest | jq -r .tag_name)
+          if [[ "$current" != "$REQUESTED_VERSION" ]]; then
+            echo "::warning::Reference audit skipped: requested release is not Latest"
+            exit 0
+          fi
+          dir="$RUNNER_TEMP/public-version-audit"
+          mkdir -p "$dir"
+          root=https://raw.githubusercontent.com/engineeringruntime
+          curl -fsSL --retry 3 "$root/engineering-runtime-docs/main/mkdocs.yaml" -o "$dir/docs-config.yaml"
+          curl -fsSL --retry 3 "$root/engineering-runtime-website/main/docs/index.md" -o "$dir/website-home.md"
+          curl -fsSL --retry 3 "$root/engineering-runtime-website/main/docs/releases.md" -o "$dir/website-releases.md"
+          curl -fsSL --retry 3 "$root/engineering-runtime-website/main/docs/references/faq.md" -o "$dir/website-faq.md"
+          curl -fsSL --retry 3 "$root/engineering-runtime-releases/main/README.md" -o "$dir/releases-readme.md"
+          curl -fsSL --retry 3 "$root/engineering-runtime-capabilities/main/README.md" -o "$dir/capabilities-readme.md"
+          python3 scripts/audit-public-version-references.py \
+            --tag "$REQUESTED_VERSION" --docs-config "$dir/docs-config.yaml" \
+            --website-home "$dir/website-home.md" \
+            --website-releases "$dir/website-releases.md" \
+            --website-faq "$dir/website-faq.md" \
+            --releases-readme "$dir/releases-readme.md" \
+            --capabilities-readme "$dir/capabilities-readme.md"
