@@ -7,6 +7,9 @@ name: Post-release distribution handoff
 on:
   release:
     types: [published]
+  # Sunday 19:23 UTC (Monday morning Australia/Melbourne), read-only audit.
+  schedule:
+    - cron: '23 19 * * 0'
   workflow_dispatch:
     inputs:
       version:
@@ -130,6 +133,7 @@ jobs:
     needs: offline-gate
     if: >-
       github.event_name == 'workflow_dispatch' ||
+      github.event_name == 'schedule' ||
       (github.event_name == 'release' &&
        !github.event.release.draft &&
        !github.event.release.prerelease)
@@ -145,9 +149,17 @@ jobs:
         run: |
           set -euo pipefail
           current=$(curl -fsSL https://api.github.com/repos/engineeringruntime/engineering-runtime-releases/releases/latest | jq -r .tag_name)
-          if [[ "$current" != "$REQUESTED_VERSION" ]]; then
+          requested="$REQUESTED_VERSION"
+          if [[ "$GITHUB_EVENT_NAME" == "schedule" ]]; then
+            requested="$current"
+          fi
+          if [[ "$current" != "$requested" ]]; then
             echo "::warning::Reference audit skipped: requested release is not Latest"
             exit 0
+          fi
+          if ! [[ "$requested" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Latest release tag has unexpected format"
+            exit 1
           fi
           dir="$RUNNER_TEMP/public-version-audit"
           mkdir -p "$dir"
@@ -159,7 +171,7 @@ jobs:
           curl -fsSL --retry 3 "$root/engineering-runtime-releases/main/README.md" -o "$dir/releases-readme.md"
           curl -fsSL --retry 3 "$root/engineering-runtime-capabilities/main/README.md" -o "$dir/capabilities-readme.md"
           python3 scripts/audit-public-version-references.py \
-            --tag "$REQUESTED_VERSION" --docs-config "$dir/docs-config.yaml" \
+            --tag "$requested" --docs-config "$dir/docs-config.yaml" \
             --website-home "$dir/website-home.md" \
             --website-releases "$dir/website-releases.md" \
             --website-faq "$dir/website-faq.md" \
