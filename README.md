@@ -84,7 +84,11 @@ The commands detect your OS and architecture:
 ```bash
 VERSION=$(curl -fsSL https://api.github.com/repos/engineeringruntime/engineering-runtime-releases/releases/latest \
   | sed -n 's/.*"tag_name": *"\([^"]*\)".*/\1/p')
-if ! printf '%s\n' "$VERSION" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+OS=$(uname -s | tr '[:upper:]' '[:lower:]')                        # darwin or linux
+if ! printf '%s\n' "$VERSION" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+$'; then
+  echo "Could not resolve a published stable release tag" >&2
+  exit 1
+fi
+OS=$(uname -s | tr '[:upper:]' '[:lower:]')                        # darwin or linux
 ARCH=$(uname -m | sed -e 's/x86_64/amd64/' -e 's/aarch64/arm64/')  # amd64 or arm64
 NAME=engrt-$VERSION-$OS-$ARCH
 BASE=https://github.com/engineeringruntime/engineering-runtime-releases/releases/download/$VERSION
