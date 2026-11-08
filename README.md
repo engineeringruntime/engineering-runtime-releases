@@ -57,12 +57,12 @@ the checksum does not match, and installs `engrt` in `/usr/local/bin` when that
 is writable, otherwise in `~/.local/bin`. It needs `curl`, `tar` and `shasum`
 or `sha256sum`.
 
-- `VERSION=v0.13.0` installs a specific release (v0.10.0 or later).
+- Set `VERSION` to an explicit tag from [published releases](https://github.com/engineeringruntime/engineering-runtime-releases/releases) when you need a reproducible, pinned install (v0.10.0 or later). Omit it for the latest published release.
 - `INSTALL_DIR=/path` installs into that directory.
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/engineeringruntime/engineering-runtime-releases/main/install.sh \
-  | VERSION=v0.13.0 INSTALL_DIR="$HOME/.local/bin" sh
+  | INSTALL_DIR="$HOME/.local/bin" sh
 ```
 
 If it prints `NOTE: … is not on your PATH`, add that directory to your shell
@@ -74,10 +74,20 @@ export PATH="$HOME/.local/bin:$PATH"
 
 ### By hand (macOS and Linux)
 
-Run this in an empty directory. It detects your OS and architecture:
+Run this in an empty directory. The example resolves the **latest published**
+release tag once, then uses that same tag for the archive and checksum.
+For a reproducible older install or an explicitly approved version, replace the
+`VERSION=$(...)` line with the exact tag from the
+[releases page](https://github.com/engineeringruntime/engineering-runtime-releases/releases).
+The commands detect your OS and architecture:
 
 ```bash
-VERSION=v0.13.0
+VERSION=$(curl -fsSL https://api.github.com/repos/engineeringruntime/engineering-runtime-releases/releases/latest \
+  | sed -n 's/.*"tag_name": *"\([^"]*\)".*/\1/p')
+if ! printf '%s\n' "$VERSION" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+$'; then
+  echo "Could not resolve a published stable release tag" >&2
+  exit 1
+fi
 OS=$(uname -s | tr '[:upper:]' '[:lower:]')                        # darwin or linux
 ARCH=$(uname -m | sed -e 's/x86_64/amd64/' -e 's/aarch64/arm64/')  # amd64 or arm64
 NAME=engrt-$VERSION-$OS-$ARCH
@@ -92,7 +102,7 @@ export PATH="$HOME/.local/bin:$PATH"                         # add this line to 
 engrt version
 ```
 
-The checksum line must print `engrt-v0.13.0-<os>-<arch>.tar.gz: OK`. If it
+The checksum line must print `$NAME.tar.gz: OK` for your selected release. If it
 prints `FAILED`, stop and download again: the archive is not the published one.
 
 ### Windows (PowerShell 7, x64 or Arm64)
@@ -107,7 +117,98 @@ engrt version
 The script selects x64 or Arm64, verifies the ZIP checksum and the executable's
 version, and installs only `engrt.exe` in `%USERPROFILE%\.local\bin`. Add that
 directory to your **user PATH** for new terminals; the script does not change
-it. Options: `-Version v0.13.0`, `-InstallDirectory C:\Tools\engrt`, and for
+it. Options: `-Version <published-tag>`, `-InstallDirectory C:\Tools\engrt`, and for
+an offline install `-Version <tag> -ArchiveDirectory <folder>` with the ZIP and
+`SHA256SUMS.txt` in that folder.
+
+By hand: download `engrt-<version>-windows-<amd64|arm64>.zip` and
+`SHA256SUMS.txt` from the release, check that `Get-FileHash <zip>` matches the
+ZIP's line, extract it and put `engrt.exe` on your `PATH`.
+
+## Next: run your first capability
+
+Installing gives you the binary; capabilities are what it runs.
+[engineering-runtime-capabilities](https://github.com/engineeringruntime/engineering-runtime-capabilities#quick-start-from-install-to-your-first-run)
+takes you from here to a first run in a few minutes: `git` and `gh`, a sample
+`config.yaml` and `policy.yaml`, GitHub authority, and running a read-only
+capability with `validate`, `plan` and `execute`.
+
+Runtime creates its home (`~/.engrt`) on the first command you run. It does
+not create a policy for you: until you supply one, the safety profile compiled
+into the binary governs.
+
+## Supported platforms
+
+From v0.10.0: macOS, Linux and Windows, each on `amd64` and `arm64`. The
+installers support v0.10.0 and later only.
+
+Releases before v0.10.0 ship a `runtime` binary in `engineering-runtime-*`
+archives. The installers refuse them and change nothing; install an older
+release by hand, in a separate directory and Runtime Home. Upgrading from
+`runtime` to `engrt`: follow the
+[upgrade guide](https://docs.engineeringruntime.com/get-started/upgrading/) to
+update environment variables and keep your earlier Runtime Home. The installers
+neither remove `runtime` nor create a `runtime` alias.
+
+## Help
+
+Report a problem with `engrt` in [this repository's issues](https://github.com/engineeringruntime/engineering-runtime-releases/issues/new/choose),
+and a problem with a capability in
+[engineering-runtime-capabilities](https://github.com/engineeringruntime/engineering-runtime-capabilities/issues/new/choose).
+Ask questions in [Discussions → Q&A](https://github.com/orgs/engineeringruntime/discussions/categories/q-a) and share ideas in
+[Discussions → Ideas](https://github.com/orgs/engineeringruntime/discussions/categories/ideas). Report security vulnerabilities privately with
+[Report a vulnerability](https://github.com/engineeringruntime/engineering-runtime-releases/security/advisories/new)
+or by email to support@engineeringruntime.com, never in a public issue; see
+[SECURITY.md](SECURITY.md).
+See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+[Installation guide](https://docs.engineeringruntime.com/get-started/installation/) ·
+[Release notes](https://docs.engineeringruntime.com/release-notes/) ·
+[Community](https://github.com/orgs/engineeringruntime/discussions) ·
+[Report an issue](https://github.com/engineeringruntime/engineering-runtime-releases/issues) ·
+[Contact](https://engineeringruntime.com/contact/)
+
+## Licence and source
+
+Engineering Runtime is **proprietary software**. Its source code is maintained
+separately and is private; publishing compiled releases does **not** make it
+open source. Use of the binaries is subject to the terms in
+[`LICENSE`](./LICENSE). No binaries or checksums are committed to this
+repository; they are GitHub Release assets.
+; then
+  echo "Could not resolve a published stable release tag" >&2
+  exit 1
+fi
+OS=$(uname -s | tr '[:upper:]' '[:lower:]')                        # darwin or linux
+ARCH=$(uname -m | sed -e 's/x86_64/amd64/' -e 's/aarch64/arm64/')  # amd64 or arm64
+NAME=engrt-$VERSION-$OS-$ARCH
+BASE=https://github.com/engineeringruntime/engineering-runtime-releases/releases/download/$VERSION
+
+curl -fsSLO "$BASE/$NAME.tar.gz"
+curl -fsSLO "$BASE/SHA256SUMS.txt"
+grep "$NAME.tar.gz" SHA256SUMS.txt | shasum -a 256 -c -     # Linux without shasum: sha256sum -c -
+tar -xzf "$NAME.tar.gz"
+mkdir -p ~/.local/bin && install -m 0755 "$NAME/engrt" ~/.local/bin/engrt
+export PATH="$HOME/.local/bin:$PATH"                         # add this line to ~/.zshrc or ~/.bashrc
+engrt version
+```
+
+The checksum line must print `$NAME.tar.gz: OK` for your selected release. If it
+prints `FAILED`, stop and download again: the archive is not the published one.
+
+### Windows (PowerShell 7, x64 or Arm64)
+
+```powershell
+Invoke-RestMethod https://raw.githubusercontent.com/engineeringruntime/engineering-runtime-releases/main/install.ps1 -OutFile install.ps1
+./install.ps1
+$env:PATH = "$HOME\.local\bin;$env:PATH"
+engrt version
+```
+
+The script selects x64 or Arm64, verifies the ZIP checksum and the executable's
+version, and installs only `engrt.exe` in `%USERPROFILE%\.local\bin`. Add that
+directory to your **user PATH** for new terminals; the script does not change
+it. Options: `-Version <published-tag>`, `-InstallDirectory C:\Tools\engrt`, and for
 an offline install `-Version <tag> -ArchiveDirectory <folder>` with the ZIP and
 `SHA256SUMS.txt` in that folder.
 
