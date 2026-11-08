@@ -13,6 +13,11 @@ on:
         description: Exact already-published stable tag (vX.Y.Z)
         type: string
         required: true
+      audit_only:
+        description: Check public documentation references without redispatching Homebrew
+        type: boolean
+        required: false
+        default: false
   pull_request:
     paths:
       - .github/workflows/post-release-distribution.yml
@@ -45,7 +50,7 @@ jobs:
     name: Verify public inventory and dispatch Homebrew
     needs: offline-gate
     if: >-
-      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'workflow_dispatch' && !inputs.audit_only) ||
       (github.event_name == 'release' &&
        !github.event.release.draft &&
        !github.event.release.prerelease)
