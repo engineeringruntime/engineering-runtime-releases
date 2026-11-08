@@ -53,14 +53,24 @@ Actions workflow `Post-release distribution handoff` and enter the exact
 published stable tag. The workflow is idempotent at the same tag; the tap
 updater does not commit again when its formula already matches.
 
+In parallel, the same Releases workflow performs a **read-only, advisory public
+version hygiene audit** of allowlisted current-version fields in Docs, Website,
+Releases and Capabilities. It flags stale release metadata and newly introduced
+hardcoded latest-version instructions without changing historical evidence.
+The report is in the workflow job summary and is not a substitute for Engineering
+Director review or comprehensive rendered-page verification. Because the audit
+can run before Docs promotion finishes, review the report after Docs merge and,
+if needed, manually rerun the workflow with `audit_only=true` (no Homebrew
+dispatch).
+
 If the handoff fails, **do not close the release**. Investigate the action
 logs, correct the missing asset or credentials, and retry without replacing
 published binaries. A manual tap updater remains available as a recovery path.
 
 ## Scope boundary
 
-The first automation migrates the **Homebrew handoff**. It does not
-automatically edit Docs/Website/Capabilities content or determine product
-changes. Remaining version references should be audited independently and
-only explicitly current-facing labels may be generalised or corrected;
-historical proof, capability minimum versions and formula checksums are fixed.
+This automation handles the **Homebrew handoff** plus a conservative
+**read-only version-reference report**. It does not automatically edit
+Docs/Website/Capabilities content or determine product changes. Engineering
+Director owns that documentation, including policy/schema changes. Historical
+proof, capability minimum versions and formula checksums remain unchanged.
