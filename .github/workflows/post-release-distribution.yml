@@ -1,0 +1,117 @@
+name: Post-release distribution handoff
+
+# This workflow does not approve or publish a Runtime release.
+# It verifies an already-published stable inventory before coordinating
+# downstream distribution. The original Runtime qualification gates remain
+# in engineering-runtime's release workflow and release operator record.
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Exact already-published stable tag (vX.Y.Z)
+        type: string
+        required: true
+  pull_request:
+    paths:
+      - .github/workflows/post-release-distribution.yml
+      - scripts/verify-distribution-release.py
+      - scripts/test-verify-distribution-release.py
+
+permissions:
+  contents: read
+
+concurrency:
+  group: post-release-distribution-${{ github.event.release.tag_name || inputs.version || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  offline-gate:
+    name: Verify distributor gate fixtures
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Offline publication inventory tests
+        run: python3 scripts/test-verify-distribution-release.py
+
+  homebrew-handoff:
+    name: Verify public inventory and dispatch Homebrew
+    needs: offline-gate
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'release' &&
+       !github.event.release.draft &&
+       !github.event.release.prerelease)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+
+      - name: Verify published stable inventory (with upload-race retries)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REQUESTED_VERSION: ${{ github.event_name == 'workflow_dispatch' && inputs.version || github.event.release.tag_name }}
+        run: |
+          set -euo pipefail
+          tag="$REQUESTED_VERSION"
+          if ! [[ "$tag" =~ ^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]; then
+            echo "::error::Only exact stable vX.Y.Z releases can update distribution"
+            exit 1
+          fi
+          dir="$RUNNER_TEMP/distribution-inventory"
+          mkdir -p "$dir"
+          for attempt in 1 2 3 4 5 6; do
+            rm -f "$dir/release.json" "$dir/latest.json" "$dir/PROVENANCE.json" "$dir/SHA256SUMS.txt"
+            if gh api "repos/engineeringruntime/engineering-runtime-releases/releases/tags/$tag" > "$dir/release.json" &&
+               gh api "repos/engineeringruntime/engineering-runtime-releases/releases/latest" > "$dir/latest.json" &&
+               gh release download "$tag" -R engineeringruntime/engineering-runtime-releases \
+                 --pattern PROVENANCE.json --pattern SHA256SUMS.txt --dir "$dir" --clobber &&
+               python3 scripts/verify-distribution-release.py \
+                 --release "$dir/release.json" --latest "$dir/latest.json" \
+                 --provenance "$dir/PROVENANCE.json" --checksums "$dir/SHA256SUMS.txt" \
+                 --tag "$tag"; then
+              printf 'APPROVED_DISTRIBUTION_TAG=%s\n' "$tag" >> "$GITHUB_ENV"
+              break
+            fi
+            if [[ "$attempt" == 6 ]]; then
+              echo "::error::Published inventory incomplete or inconsistent; no downstream dispatch"
+              exit 1
+            fi
+            sleep 15
+          done
+
+      - name: Confirm Latest still matches before dispatch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          current=$(gh api repos/engineeringruntime/engineering-runtime-releases/releases/latest --jq .tag_name)
+          test "$current" = "$APPROVED_DISTRIBUTION_TAG" || {
+            echo "::error::Latest release changed; refusing stale downstream dispatch"
+            exit 1
+          }
+
+      - name: Request exact-version Homebrew update
+        env:
+          GH_TOKEN: ${{ secrets.HOMEBREW_TAP_DISPATCH_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [[ -z "$GH_TOKEN" ]]; then
+            echo "::error::Missing HOMEBREW_TAP_DISPATCH_TOKEN: configure a narrowly scoped token with Actions write on homebrew-tap"
+            exit 1
+          fi
+          gh workflow run update.yml \
+            -R engineeringruntime/homebrew-tap \
+            --ref main \
+            -f release_version="$APPROVED_DISTRIBUTION_TAG"
+          {
+            echo "### Downstream distribution handoff"
+            echo "Requested the Homebrew formula updater for **$APPROVED_DISTRIBUTION_TAG**."
+            echo "This reports dispatch acceptance, **not** a qualified Homebrew install or passing downstream CI."
+            echo "Verify the [Homebrew updater and CI runs](https://github.com/engineeringruntime/homebrew-tap/actions) before release closure."
+          } >> "$GITHUB_STEP_SUMMARY"
