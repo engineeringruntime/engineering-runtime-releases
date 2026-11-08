@@ -58,10 +58,13 @@ version hygiene audit** of allowlisted current-version fields in Docs, Website,
 Releases and Capabilities. It flags stale release metadata and newly introduced
 hardcoded latest-version instructions without changing historical evidence.
 The report is in the workflow job summary and is not a substitute for Engineering
-Director review or comprehensive rendered-page verification. Because the audit
-can run before Docs promotion finishes, review the report after Docs merge and,
-if needed, manually rerun the workflow with `audit_only=true` (no Homebrew
-dispatch).
+Director review or comprehensive rendered-page verification. Because the release-event audit can run before Docs promotion, an additional
+**weekly scheduled audit** checks the current GitHub Latest version against the
+public references after publication. The scheduled job is read-only and
+**never dispatches Homebrew**. Review warnings and the job summary; if you need
+an immediate recheck after merging Docs, use manual `audit_only=true` (which
+also never dispatches Homebrew). The audit only covers six allowlisted source
+files and does not replace review of release content or historical evidence.
 
 If the handoff fails, **do not close the release**. Investigate the action
 logs, correct the missing asset or credentials, and retry without replacing
