@@ -23,11 +23,13 @@ An accepted dispatch is **not** a passing Homebrew test.
 ## One-time setup before enabling automatic dispatch
 
 Configure `HOMEBREW_TAP_DISPATCH_TOKEN` as an Actions secret **in
-`engineering-runtime-releases`**. It must be a narrowly scoped GitHub App
-installation token or fine-grained credential allowed to run Actions workflows
-on `engineeringruntime/homebrew-tap` (Actions: write, limited to that
-repository). Do not use a broadly scoped personal token or print this secret.
-The workflow fails closed if the secret is absent.
+`engineering-runtime-releases`**. The current workflow expects a
+**fine-grained GitHub token** restricted to `engineeringruntime/homebrew-tap`
+with Actions: write, and no unnecessary repository privileges. Review its
+expiration and rotation policy. Do not use a broadly scoped classic token or
+print the secret. The workflow fails closed if the secret is absent.
+A GitHub App is preferable longer term, but its **short-lived installation
+token must be minted during each run**, not stored as a static secret.
 
 Merge the tap-side workflow change **before** this workflow so it accepts
 `release_version` and explicitly starts Homebrew CI.
