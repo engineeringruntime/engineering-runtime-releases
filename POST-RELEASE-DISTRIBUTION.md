@@ -1,0 +1,64 @@
+# Post-release distribution handoff
+
+The **Runtime release operator** approves and qualifies each exact source revision
+and native binary set. The private Runtime publishing workflow transfers those
+exact bytes to a stable public GitHub Release. This repository does not qualify,
+rebuild, replace, retag, or publish Runtime binaries.
+
+After a stable `release.published` event, the
+[`post-release-distribution.yml`](.github/workflows/post-release-distribution.yml)
+workflow verifies the published release's **eight-asset inventory** against
+`PROVENANCE.json`, `SHA256SUMS.txt`, the exact tag, and GitHub's current
+non-prerelease Latest pointer. It tolerates the asset-upload race through
+bounded retries, but fails closed on missing, mismatched or stale metadata.
+This is a **distribution consistency gate**, not a substitute for the
+qualification evidence or downloaded-byte comparison owned by Runtime.
+
+If the gate passes, the workflow dispatches the existing
+[`homebrew-tap/update.yml`](https://github.com/engineeringruntime/homebrew-tap/blob/main/.github/workflows/update.yml)
+with the exact version. The tap owns formula generation and exact checksum
+pins; it explicitly dispatches its native four-platform CI after updating.
+An accepted dispatch is **not** a passing Homebrew test.
+
+## One-time setup before enabling automatic dispatch
+
+Configure `HOMEBREW_TAP_DISPATCH_TOKEN` as an Actions secret **in
+`engineering-runtime-releases`**. It must be a narrowly scoped GitHub App
+installation token or fine-grained credential allowed to run Actions workflows
+on `engineeringruntime/homebrew-tap` (Actions: write, limited to that
+repository). Do not use a broadly scoped personal token or print this secret.
+The workflow fails closed if the secret is absent.
+
+Merge the tap-side workflow change **before** this workflow so it accepts
+`release_version` and explicitly starts Homebrew CI.
+
+## Normal and recovery flow
+
+1. Runtime release skill qualifies and the owner approves publication.
+2. Runtime publishing creates the public non-draft, non-prerelease GitHub Release.
+3. Releases' publication inventory gate accepts that exact stable tag.
+4. The tap updater generates and pushes the exact formula, then dispatches CI.
+5. The release operator **checks all four Homebrew CI platforms**, verifies the
+   formula provenance and tests the installed binary on the owner's Mac.
+6. The Engineering Director maintains release notes, schema/policy/provider
+   claims and Docs content. Website/README installation links stay evergreen.
+   Review the Docs approved version metadata separately.
+
+The `release.published` event may be unavailable if the release was created
+using a token that does not propagate workflow events. In that case, after
+ensuring the same publication gates are satisfied, recover with the manual
+Actions workflow `Post-release distribution handoff` and enter the exact
+published stable tag. The workflow is idempotent at the same tag; the tap
+updater does not commit again when its formula already matches.
+
+If the handoff fails, **do not close the release**. Investigate the action
+logs, correct the missing asset or credentials, and retry without replacing
+published binaries. A manual tap updater remains available as a recovery path.
+
+## Scope boundary
+
+The first automation migrates the **Homebrew handoff**. It does not
+automatically edit Docs/Website/Capabilities content or determine product
+changes. Remaining version references should be audited independently and
+only explicitly current-facing labels may be generalised or corrected;
+historical proof, capability minimum versions and formula checksums are fixed.
